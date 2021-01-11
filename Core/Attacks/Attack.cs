@@ -1,10 +1,11 @@
-﻿using System;
+﻿using rpsls.Game;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace rpsls.Attacks
 {
-    public class Attack
+    public class Attack : IComparable<Attack>
     {
         private readonly IList<DefeatConfig> defeatConfigs;
 
@@ -16,21 +17,6 @@ namespace rpsls.Attacks
 
         public AttackType AttackType { get; }
 
-        public AttackResult GetAttackResult(AttackType attackType)
-        {
-            if (attackType.Equals(AttackType))
-            {
-                return AttackResult.Tie;
-            }
-
-            if (defeatConfigs.Any(defeatConfig => defeatConfig.AttackType.Equals(attackType))) 
-            {
-                return AttackResult.Lose;
-            }
-
-            return AttackResult.Win;
-        }
-
         public string GetDefeatMessage(AttackType attackType)
         { 
             if (!defeatConfigs.Any(defeatConfig => defeatConfig.AttackType.Equals(attackType)))
@@ -40,6 +26,21 @@ namespace rpsls.Attacks
 
             return defeatConfigs.First(defeatConfig => defeatConfig.AttackType.Equals(attackType))
                 .Message;
+        }
+
+        public int CompareTo(Attack other)
+        {
+            if (AttackType.Equals(other.AttackType))
+            {
+                return (int)AttackResult.Tie;
+            }
+
+            if (defeatConfigs.Any(defeatConfig => defeatConfig.AttackType.Equals(other.AttackType)))
+            {
+                return (int)AttackResult.Lose;
+            }
+
+            return (int)AttackResult.Win;
         }
 
         public static Attack From(AttackType attackType, IList<DefeatConfig> defeatConfigs)

@@ -1,4 +1,4 @@
-﻿namespace rpsls
+﻿namespace rpsls.Game
 {
     public sealed class GameConfig
     {

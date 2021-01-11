@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using rpsls.Attacks;
+using rpsls.Game;
 using System;
 using System.IO;
 using System.Linq;
