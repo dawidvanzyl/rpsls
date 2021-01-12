@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
+using rpsls.Application.Repositories;
 using rpsls.Domain;
 using rpsls.Domain.Values;
+using rpsls.Infrastructure.Factories;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +10,7 @@ using System.Linq;
 
 namespace rpsls.Infrastructure
 {
-    public class AppSettings
+    public class AppSettings : ISettingsRepository
     {
         private readonly IConfiguration configuration;
 
@@ -69,35 +71,33 @@ namespace rpsls.Infrastructure
                 attacks.Add(Attack.From(attackValue, defeatedByValues.ToList()));
             }
 
-            return attacks;
+            return attacks
+                .OrderBy(attack => attack.AttackValue.Value)
+                .ToList();
         }
 
-        public GameValue GetGameValue()
+        public IList<GameValue> GetGameValues()
         {
-            var gameConfiguration = configuration["Game:Configuration"];
-            var attackConfigurations = configuration.GetSection("Game").GetSection("Attacks")
+            var attacks = GetAttacks();
+            var gameConfigurations = configuration.GetSection("Game")
                 .GetChildren();
 
-            var attackConfigurationValid = attackConfigurations.Any(attackConfiguration => attackConfiguration.Key.Equals(gameConfiguration, StringComparison.OrdinalIgnoreCase));
-            if (!attackConfigurationValid)
+            var gameValues = new List<GameValue>();
+            foreach (var gameConfiguration in gameConfigurations)
             {
-                throw new ArgumentOutOfRangeException(gameConfiguration, $"Game configuration does not have an attack configuration.");
+                var lastAttackIndex = Convert.ToByte(gameConfiguration.Value);
+                var gameAttacks = attacks.Where(attack => attack.AttackValue.Value <= lastAttackIndex);
+
+                var attackIndexValid = gameAttacks.Count().Equals(lastAttackIndex);
+                if (!attackIndexValid)
+                {
+                    throw new ArgumentOutOfRangeException(gameConfiguration.Key, "Configuration cannot be transformed into attacks.");
+                }
+
+                gameValues.Add(GameValue.From(gameConfiguration.Key, gameAttacks.ToList()));
             }
 
-            var attacks = GetAttacks();
-            var lastAttackIndex = Convert.ToByte(configuration[$"Game:Attacks:{gameConfiguration}"]);
-
-            var gameAttacks = attacks.Where(attack => attack.AttackValue.Value <= lastAttackIndex);
-            var attackIndexValid = gameAttacks.Count().Equals(lastAttackIndex);
-
-            if (!attackIndexValid)
-            {
-                throw new ArgumentOutOfRangeException(gameConfiguration, "Attack configuration cannot be transformed into attacks.");
-            }
-
-            var rounds = Convert.ToInt16(configuration["Game:Rounds"]);
-
-            return GameValue.From(gameConfiguration, gameAttacks.ToList(), rounds);
+            return gameValues;
         }
     }
 }

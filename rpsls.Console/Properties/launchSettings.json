@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "rpsls.Console": {
+      "commandName": "Project"
+    }
+  }
+}

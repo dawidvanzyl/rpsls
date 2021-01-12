@@ -29,9 +29,6 @@
     <None Update="appsettings.invalidgameattackconfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="appsettings.invalidconfiguration.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="appsettings.gamevalue.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

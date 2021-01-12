@@ -1,5 +1,4 @@
-﻿using rpsls.Domain.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -8,29 +7,31 @@ namespace rpsls.Domain.Values
 {
     public class GameValue : IEquatable<GameValue>
     {
-        private GameValue(string configuration, IList<Attack> attacks, short rounds)
+        private GameValue(string name, IList<Attack> attacks)
         {
-            Configuration = configuration;
+            Name = name;
             Attacks = attacks;
-            Rounds = rounds;
         }
 
-        public string Configuration { get; }
+        public string Name { get; }
         public IList<Attack> Attacks { get; }
-        public short Rounds { get; }
 
         public bool Equals([AllowNull] GameValue other)
         {
             if (other == null) return false;
 
-            return Configuration.Equals(other.Configuration)
-                && Rounds.Equals(other.Rounds)
+            return Name.Equals(other.Name)
                 && Attacks.All(attack => other.Attacks.Contains(attack));
         }
 
-        public static GameValue From(string configuration, IList<Attack> attacks, short rounds)
+        public static GameValue From(string name, IList<Attack> attacks)
         {
-            return new GameValue(configuration, attacks, rounds);
+            return new GameValue(name, attacks);
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }

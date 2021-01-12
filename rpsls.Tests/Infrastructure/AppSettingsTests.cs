@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using rpsls.Infrastructure;
+using rpsls.Infrastructure.Factories;
 using System.IO;
 
 namespace rpsls.Tests.Infrastructure

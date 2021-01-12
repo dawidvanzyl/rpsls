@@ -34,15 +34,15 @@ namespace rpsls.Domain
         {
             if (AttackValue.Equals(other.AttackValue))
             {
-                return (int)AttackResult.Tie;
+                return (int)AttackResult.Tied;
             }
 
             if (defeatedByValues.Any(defeatConfig => defeatConfig.AttackValue.Equals(other.AttackValue)))
             {
-                return (int)AttackResult.Lose;
+                return (int)AttackResult.Lost;
             }
 
-            return (int)AttackResult.Win;
+            return (int)AttackResult.Won;
         }
 
         public bool Equals([AllowNull] Attack other)
@@ -56,6 +56,11 @@ namespace rpsls.Domain
         public static Attack From(AttackValue attackValue, IList<DefeatedByValue> defeatedByValues)
         {
             return new Attack(attackValue, defeatedByValues);
+        }
+
+        public override string ToString()
+        {
+            return AttackValue.Name;
         }
     }
 }

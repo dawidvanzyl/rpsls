@@ -8,10 +8,29 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
+    <PackageReference Include="Microsoft.ML" Version="1.5.0-preview2" />
+    <PackageReference Include="Microsoft.ML.FastTree" Version="1.5.0-preview2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\rpsls.Domain\rpsls.Domain.csproj" />
+    <ProjectReference Include="..\rpsls.Application\rpsls.Application.csproj" />
+    <ProjectReference Include="..\rpsls.Domain\rpsls.Domain.csproj" />    
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="MLEngines\AttackPredictionML\MLModel.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MLEngines\PlayerAttackForecastML\MLModel.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="rpsls.player.initial.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="MLEngines\AttackPredictionML\" />
   </ItemGroup>
 
 </Project>

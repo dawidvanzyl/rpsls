@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using rpsls.Domain;
-using rpsls.Domain.Enums;
 using rpsls.Domain.Values;
 using System;
 using System.Collections.Generic;
@@ -11,33 +10,18 @@ namespace rpsls.Tests.Infrastructure
     public partial class AppSettingsTests
     {
         [Fact]
-        public void GetGameValue_Throws_ArgumentOutOfRangeException_When_Configuration_Not_In_Attacks()
-        {
-            //arrange
-            var appSettings = Make_AppSettings("appsettings.invalidconfiguration.json");
-
-            //action
-            Action action = () => appSettings.GetGameValue();
-
-            //assert
-            action.Should()
-                .Throw<ArgumentOutOfRangeException>()
-                .WithMessage("Game configuration does not have an attack configuration. (Parameter 'Invalid')");
-        }
-
-        [Fact]
         public void GetGameValue_Throws_ArgumentOutOfRangeException_When_Attack_Configuration_Is_Invalid()
         {
             //arrange
             var appSettings = Make_AppSettings("appsettings.invalidgameattackconfig.json");
 
             //action
-            Action action = () => appSettings.GetGameValue();
+            Action action = () => appSettings.GetGameValues();
 
             //assert
             action.Should()
                 .Throw<ArgumentOutOfRangeException>()
-                .WithMessage($"Attack configuration cannot be transformed into attacks. (Parameter 'Invalid')");
+                .WithMessage($"Configuration cannot be transformed into attacks. (Parameter 'Invalid')");
         }
 
         [Fact]
@@ -50,14 +34,14 @@ namespace rpsls.Tests.Infrastructure
             var paperDefeatedByValue = DefeatedByValue.From(AttackValue.From("Paper", 2), "Paper covers Rock.");
             var spockDefeatedByValue = DefeatedByValue.From(AttackValue.From("Spock", 3), "Spock vaporizes Rock.");
             var attack = Attack.From(rockAttack, new List<DefeatedByValue> { paperDefeatedByValue, spockDefeatedByValue });
-            var expectedGameValue = GameValue.From("Rock-Paper-Scissors", new List<Attack> { attack }, rounds: 10);
+            var expectedGameValue = GameValue.From("Rock-Paper-Scissors", new List<Attack> { attack });
 
 
             //action
-            var actualGameValue = appSettings.GetGameValue();
+            var gameValues = appSettings.GetGameValues();
 
             //assert            
-            actualGameValue.Should().BeEquivalentTo(expectedGameValue);
+            gameValues.Should().ContainEquivalentOf(expectedGameValue);
         }
     }
 }

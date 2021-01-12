@@ -2,8 +2,8 @@
 {
     public enum AttackResult
     {
-        Win = -1,
-        Tie = 0,
-        Lose = 1
+        Lost = -1,
+        Tied = 0,
+        Won = 1
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.IO;
 
-namespace rpsls.Infrastructure
+namespace rpsls.Infrastructure.Factories
 {
     public interface IConfigurationFactory
     {
