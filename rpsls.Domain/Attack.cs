@@ -24,6 +24,46 @@ namespace rpsls.Domain
             return new Attack(attackValue, defeatedByValues);
         }
 
+        public static bool operator !=(Attack left, Attack right)
+        {
+            return !(left == right);
+        }
+
+        public static bool operator <(Attack left, Attack right)
+        {
+            return left is null
+                ? right is null
+                : left.CompareTo(right) < 0;
+        }
+
+        public static bool operator <=(Attack left, Attack right)
+        {
+            return left is null
+                ? right is null
+                : left.Equals(right) || left.CompareTo(right) < 0;
+        }
+
+        public static bool operator ==(Attack left, Attack right)
+        {
+            return left is null
+                ? right is null
+                : left.Equals(right);
+        }
+
+        public static bool operator >(Attack left, Attack right)
+        {
+            return left is null
+                ? right is null
+                : left.CompareTo(right) > 0;
+        }
+
+        public static bool operator >=(Attack left, Attack right)
+        {
+            return left is null
+                ? right is null
+                : left.Equals(right) || left.CompareTo(right) > 0;
+        }
+
         public int CompareTo(Attack other)
         {
             var isTied = AttackValue.Equals(other.AttackValue);
@@ -45,6 +85,11 @@ namespace rpsls.Domain
                 && defeatedByValues.All(defeatedByValue => other.defeatedByValues.Contains(defeatedByValue));
         }
 
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Attack);
+        }
+
         public string GetDefeatMessage(AttackValue attackValue)
         {
             if (!defeatedByValues.Any(defeatConfig => defeatConfig.AttackValue.Equals(attackValue)))
@@ -57,6 +102,13 @@ namespace rpsls.Domain
                 .Message;
 
             return message;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(
+                AttackValue.GetHashCode(),
+                defeatedByValues.GetHashCode());
         }
 
         public override string ToString()

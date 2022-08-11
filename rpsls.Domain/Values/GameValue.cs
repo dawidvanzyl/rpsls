@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace rpsls.Domain.Values
 {
-    public class GameValue : IEquatable<GameValue>
+    public sealed class GameValue : IEquatable<GameValue>
     {
         private GameValue(string name, IList<Attack> attacks)
         {

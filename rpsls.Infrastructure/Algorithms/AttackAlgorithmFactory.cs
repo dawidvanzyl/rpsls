@@ -1,11 +1,16 @@
-﻿using rpsls.Application;
-using rpsls.Application.Repositories;
+﻿using rpsls.Domain.Values;
+using rpsls.Infrastructure.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace rpsls.Infrastructure.Algorithms
 {
+    public interface IAttackStrategyFactory
+    {
+        IAttackStrategy CreateRandomAttackAlgorithm(GameValue gameValue);
+    }
+
     public class AttackAlgorithmFactory : IAttackStrategyFactory
     {
         private readonly IDictionary<string, IAttackStrategy> attackStrategies;
@@ -23,15 +28,16 @@ namespace rpsls.Infrastructure.Algorithms
 
         public IAttackStrategy CreateRandomAttackAlgorithm(Domain.Values.GameValue gameValue)
         {
-            string randomAttackAlgorithmKey = $"{gameValue.Name}_{nameof(RandomAttackAlgorithm)}";
+            var randomAttackAlgorithmKey = $"{gameValue.Name}_{nameof(RandomAttackAlgorithm)}";
 
-            bool gameServiceRegistered = attackStrategies.ContainsKey(randomAttackAlgorithmKey);
+            var gameServiceRegistered = attackStrategies.ContainsKey(randomAttackAlgorithmKey);
             if (!gameServiceRegistered)
             {
                 throw new InvalidOperationException($"Game value {randomAttackAlgorithmKey} has not been registered.");
             }
 
-            return attackStrategies[randomAttackAlgorithmKey];
+            var attackStrategy = attackStrategies[randomAttackAlgorithmKey];
+            return attackStrategy;
         }
     }
 }

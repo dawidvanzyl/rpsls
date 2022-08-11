@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using rpsls.Infrastructure.Factories;
+using rpsls.IoC.Extensions;
 
 namespace rpsls.Console
 {
@@ -7,8 +7,8 @@ namespace rpsls.Console
     {
         private static void Main()
         {
-            var serviceProvider = ServiceCollectionFactory
-                .Create()
+            var serviceProvider = new ServiceCollection()
+                .AddDefaults()
                 .AddSingleton<GamePrompts>()
                 .BuildServiceProvider();
 

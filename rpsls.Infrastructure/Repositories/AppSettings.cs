@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using rpsls.Application.Repositories;
 using rpsls.Domain;
 using rpsls.Domain.Values;
 using rpsls.Infrastructure.Factories;
@@ -8,8 +7,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace rpsls.Infrastructure
+namespace rpsls.Infrastructure.Repositories
 {
+    public interface ISettingsRepository
+    {
+        IList<Attack> GetAttacks();
+
+        IList<AttackValue> GetAttackValues();
+
+        IList<GameValue> GetGameValues();
+    }
+
     public class AppSettings : ISettingsRepository
     {
         private readonly IConfiguration configuration;
@@ -17,22 +25,6 @@ namespace rpsls.Infrastructure
         public AppSettings(IConfigurationFactory configurationFactory)
         {
             configuration = configurationFactory.GetConfiguration();
-        }
-
-        public IList<AttackValue> GetAttackValues()
-        {
-            var attackTypeConfigs = configuration.GetSection("AttackValues")
-                .GetChildren();
-
-            var attackTypes = new List<AttackValue>();
-            foreach (var attackTypeConfig in attackTypeConfigs)
-            {
-                attackTypes.Add(AttackValue.From(attackTypeConfig.Key, Convert.ToByte(attackTypeConfig.Value)));
-            }
-
-            return attackTypes
-                .OrderBy(attackType => attackType.Value)
-                .ToList();
         }
 
         public IList<Attack> GetAttacks()
@@ -73,6 +65,22 @@ namespace rpsls.Infrastructure
 
             return attacks
                 .OrderBy(attack => attack.AttackValue.Value)
+                .ToList();
+        }
+
+        public IList<AttackValue> GetAttackValues()
+        {
+            var attackTypeConfigs = configuration.GetSection("AttackValues")
+                .GetChildren();
+
+            var attackTypes = new List<AttackValue>();
+            foreach (var attackTypeConfig in attackTypeConfigs)
+            {
+                attackTypes.Add(AttackValue.From(attackTypeConfig.Key, Convert.ToByte(attackTypeConfig.Value)));
+            }
+
+            return attackTypes
+                .OrderBy(attackType => attackType.Value)
                 .ToList();
         }
 

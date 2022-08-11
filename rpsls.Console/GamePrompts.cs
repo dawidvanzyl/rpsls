@@ -1,7 +1,7 @@
 ﻿using rpsls.Application;
-using rpsls.Application.Repositories;
 using rpsls.Domain.Enums;
 using rpsls.Domain.Values;
+using rpsls.Infrastructure.Repositories;
 using Sharprompt;
 using System;
 using System.Collections.Generic;
@@ -10,13 +10,13 @@ namespace rpsls.Console
 {
     public class GamePrompts
     {
-        private readonly IAttackStrategyFactory attackStrategyFactory;
+        private readonly GameServiceFactory gameServiceFactory;
         private readonly IList<GameValue> gameValues;
 
-        public GamePrompts(ISettingsRepository settingsRepository, IAttackStrategyFactory attackStrategyFactory)
+        public GamePrompts(ISettingsRepository settingsRepository, GameServiceFactory gameServiceFactory)
         {
             gameValues = settingsRepository.GetGameValues();
-            this.attackStrategyFactory = attackStrategyFactory;
+            this.gameServiceFactory = gameServiceFactory;
         }
 
         public void Play()
@@ -39,7 +39,7 @@ namespace rpsls.Console
             System.Console.WriteLine($"{gameValue}");
             System.Console.WriteLine("");
 
-            var attackStrategy = attackStrategyFactory.CreateRandomAttackAlgorithm(gameValue);
+            var gameService = gameServiceFactory.Create(gameValue);
             for (byte i = 0; i < rounds; i++)
             {
                 System.Console.WriteLine($"Round {i + 1}");
@@ -52,15 +52,16 @@ namespace rpsls.Console
                 var player1Attack = Prompt.Select($"{player1Name} please select you attack", gameValue.Attacks);
                 var player2Attack = twoPlayerGame
                     ? Prompt.Select($"{player2Name} please select you attack", gameValue.Attacks)
-                    : attackStrategy.GetAttack();
+                    : gameService.GetAttack();
 
                 System.Console.WriteLine("");
                 System.Console.WriteLine($"{player1Name} attacked with {player1Attack}");
                 System.Console.WriteLine($"{player2Name} attacked with {player2Attack}");
                 System.Console.WriteLine("");
 
-                var matchResult = (AttackResult)player1Attack.CompareTo(player2Attack);
-                switch (matchResult)
+                var attackResult = (AttackResult)player1Attack.CompareTo(player2Attack);
+                gameService.SaveMatchResult(player1Attack, player2Attack, attackResult);
+                switch (attackResult)
                 {
                     case AttackResult.Won:
                         System.Console.WriteLine(player2Attack.GetDefeatMessage(player1Attack.AttackValue));

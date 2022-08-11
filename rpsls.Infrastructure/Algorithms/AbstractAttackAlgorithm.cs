@@ -1,8 +1,12 @@
-﻿using rpsls.Application;
-using rpsls.Domain;
+﻿using rpsls.Domain;
 
 namespace rpsls.Infrastructure.Algorithms
 {
+    public interface IAttackStrategy
+    {
+        Attack GetAttack();
+    }
+
     public abstract class AbstractAttackAlgorithm : IAttackStrategy
     {
         protected readonly Attack[] attacks;

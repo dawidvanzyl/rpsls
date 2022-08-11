@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
-using rpsls.Infrastructure;
 using rpsls.Infrastructure.Factories;
+using rpsls.Infrastructure.Repositories;
 using System.IO;
 
 namespace rpsls.Tests.Infrastructure
@@ -11,7 +11,7 @@ namespace rpsls.Tests.Infrastructure
         {
             var configurationFactory = new AppSettingsTestsConfigurationFactory(configFile);
             return new AppSettings(configurationFactory);
-        }        
+        }
     }
 
     public sealed class AppSettingsTestsConfigurationFactory : IConfigurationFactory
