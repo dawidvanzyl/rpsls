@@ -1,5 +1,4 @@
 ﻿using rpsls.Application;
-using rpsls.Application.Entities;
 using rpsls.Application.Repositories;
 using rpsls.Domain.Enums;
 using rpsls.Domain.Values;
@@ -11,13 +10,13 @@ namespace rpsls.Console
 {
     public class GamePrompts
     {
+        private readonly IAttackStrategyFactory attackStrategyFactory;
         private readonly IList<GameValue> gameValues;
-        private readonly GameServiceFactory gameServiceFactory;
 
-        public GamePrompts(ISettingsRepository settingsRepository, GameServiceFactory gameServiceFactory)
+        public GamePrompts(ISettingsRepository settingsRepository, IAttackStrategyFactory attackStrategyFactory)
         {
             gameValues = settingsRepository.GetGameValues();
-            this.gameServiceFactory = gameServiceFactory;
+            this.attackStrategyFactory = attackStrategyFactory;
         }
 
         public void Play()
@@ -40,8 +39,7 @@ namespace rpsls.Console
             System.Console.WriteLine($"{gameValue}");
             System.Console.WriteLine("");
 
-            var gameService = gameServiceFactory.Create(gameValue);
-            MatchResult previousMatchResult = null;
+            var attackStrategy = attackStrategyFactory.CreateRandomAttackAlgorithm(gameValue);
             for (byte i = 0; i < rounds; i++)
             {
                 System.Console.WriteLine($"Round {i + 1}");
@@ -54,25 +52,25 @@ namespace rpsls.Console
                 var player1Attack = Prompt.Select($"{player1Name} please select you attack", gameValue.Attacks);
                 var player2Attack = twoPlayerGame
                     ? Prompt.Select($"{player2Name} please select you attack", gameValue.Attacks)
-                    : gameService.PredictAttack(previousMatchResult);
-
-                var matchResult = gameService.RecordMatchResult(player1Attack, player2Attack, previousMatchResult);
-                previousMatchResult = matchResult;
+                    : attackStrategy.GetAttack();
 
                 System.Console.WriteLine("");
                 System.Console.WriteLine($"{player1Name} attacked with {player1Attack}");
                 System.Console.WriteLine($"{player2Name} attacked with {player2Attack}");
                 System.Console.WriteLine("");
 
-                switch (matchResult.AttackResult)
+                var matchResult = (AttackResult)player1Attack.CompareTo(player2Attack);
+                switch (matchResult)
                 {
                     case AttackResult.Won:
                         System.Console.WriteLine(player2Attack.GetDefeatMessage(player1Attack.AttackValue));
                         System.Console.WriteLine($"{player1Name} {AttackResult.Won.ToString().ToUpper()}");
                         break;
+
                     case AttackResult.Tied:
                         System.Console.WriteLine($"Match {AttackResult.Tied.ToString().ToUpper()}");
                         break;
+
                     case AttackResult.Lost:
                         System.Console.WriteLine(player1Attack.GetDefeatMessage(player2Attack.AttackValue));
                         System.Console.WriteLine($"{player2Name} {AttackResult.Won.ToString().ToUpper()}");

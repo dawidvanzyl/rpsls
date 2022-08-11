@@ -19,6 +19,32 @@ namespace rpsls.Domain
 
         public AttackValue AttackValue { get; }
 
+        public static Attack From(AttackValue attackValue, IList<DefeatedByValue> defeatedByValues)
+        {
+            return new Attack(attackValue, defeatedByValues);
+        }
+
+        public int CompareTo(Attack other)
+        {
+            var isTied = AttackValue.Equals(other.AttackValue);
+            if (isTied)
+            {
+                return (int)AttackResult.Tied;
+            }
+
+            var hasLost = defeatedByValues.Any(defeatConfig => defeatConfig.AttackValue.Equals(other.AttackValue));
+            return hasLost
+                ? (int)AttackResult.Lost
+                : (int)AttackResult.Won;
+        }
+
+        public bool Equals([AllowNull] Attack other)
+        {
+            return other != null
+                && AttackValue.Equals(other.AttackValue)
+                && defeatedByValues.All(defeatedByValue => other.defeatedByValues.Contains(defeatedByValue));
+        }
+
         public string GetDefeatMessage(AttackValue attackValue)
         {
             if (!defeatedByValues.Any(defeatConfig => defeatConfig.AttackValue.Equals(attackValue)))
@@ -26,36 +52,11 @@ namespace rpsls.Domain
                 throw new ArgumentOutOfRangeException(attackValue.Name, "Defeated by value not found");
             }
 
-            return defeatedByValues.First(defeatConfig => defeatConfig.AttackValue.Equals(attackValue))
+            var message = defeatedByValues
+                .First(defeatConfig => defeatConfig.AttackValue.Equals(attackValue))
                 .Message;
-        }
 
-        public int CompareTo(Attack other)
-        {
-            if (AttackValue.Equals(other.AttackValue))
-            {
-                return (int)AttackResult.Tied;
-            }
-
-            if (defeatedByValues.Any(defeatConfig => defeatConfig.AttackValue.Equals(other.AttackValue)))
-            {
-                return (int)AttackResult.Lost;
-            }
-
-            return (int)AttackResult.Won;
-        }
-
-        public bool Equals([AllowNull] Attack other)
-        {
-            if (other == null) return false;
-
-            return AttackValue.Equals(other.AttackValue)
-                && defeatedByValues.All(defeatedByValue => other.defeatedByValues.Contains(defeatedByValue));
-        }
-
-        public static Attack From(AttackValue attackValue, IList<DefeatedByValue> defeatedByValues)
-        {
-            return new Attack(attackValue, defeatedByValues);
+            return message;
         }
 
         public override string ToString()

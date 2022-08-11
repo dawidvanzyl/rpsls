@@ -14,17 +14,16 @@ namespace rpsls.Domain.Values
         public string Name { get; }
         public byte Value { get; }
 
-        public bool Equals([AllowNull] AttackValue other)
-        {
-            if (other == null) return false;
-
-            return Name.Equals(other.Name)
-                && Value.Equals(other.Value);
-        }
-
         public static AttackValue From(string name, byte value)
         {
             return new AttackValue(name, value);
+        }
+
+        public bool Equals([AllowNull] AttackValue other)
+        {
+            return other != null
+                && Name.Equals(other.Name)
+                && Value.Equals(other.Value);
         }
     }
 }

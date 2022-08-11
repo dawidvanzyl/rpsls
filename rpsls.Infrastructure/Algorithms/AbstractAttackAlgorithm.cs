@@ -1,10 +1,9 @@
 ﻿using rpsls.Application;
-using rpsls.Application.Entities;
 using rpsls.Domain;
 
 namespace rpsls.Infrastructure.Algorithms
 {
-    public abstract class AbstractAttackAlgorithm : IAttackStrategy 
+    public abstract class AbstractAttackAlgorithm : IAttackStrategy
     {
         protected readonly Attack[] attacks;
 
@@ -13,6 +12,6 @@ namespace rpsls.Infrastructure.Algorithms
             this.attacks = attacks;
         }
 
-        public abstract Attack GetAttack(MatchResult previousMatchResult);
+        public abstract Attack GetAttack();
     }
 }

@@ -13,20 +13,19 @@ namespace rpsls.Domain.Values
             Attacks = attacks;
         }
 
-        public string Name { get; }
         public IList<Attack> Attacks { get; }
-
-        public bool Equals([AllowNull] GameValue other)
-        {
-            if (other == null) return false;
-
-            return Name.Equals(other.Name)
-                && Attacks.All(attack => other.Attacks.Contains(attack));
-        }
+        public string Name { get; }
 
         public static GameValue From(string name, IList<Attack> attacks)
         {
             return new GameValue(name, attacks);
+        }
+
+        public bool Equals([AllowNull] GameValue other)
+        {
+            return other != null
+                && Name.Equals(other.Name)
+                && Attacks.All(attack => other.Attacks.Contains(attack));
         }
 
         public override string ToString()

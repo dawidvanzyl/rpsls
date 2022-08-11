@@ -18,21 +18,7 @@ namespace rpsls.Infrastructure.Algorithms
             foreach (var gameValue in gameValues)
             {
                 attackStrategies.Add($"{gameValue.Name}_{nameof(RandomAttackAlgorithm)}", new RandomAttackAlgorithm(gameValue.Attacks.ToArray()));
-                attackStrategies.Add($"{gameValue.Name}_{nameof(MLAttackAlgorithm)}", new MLAttackAlgorithm(gameValue.Attacks.ToArray()));
             }
-        }
-
-        public IAttackStrategy CreateMLAttackAlgorithm(Domain.Values.GameValue gameValue)
-        {
-            string mlAttackAlgorithmKey = $"{gameValue.Name}_{nameof(MLAttackAlgorithm)}";
-
-            bool gameServiceRegistered = attackStrategies.ContainsKey(mlAttackAlgorithmKey);
-            if (!gameServiceRegistered)
-            {
-                throw new InvalidOperationException($"Game value {mlAttackAlgorithmKey} has not been registered.");
-            }
-
-            return attackStrategies[mlAttackAlgorithmKey];
         }
 
         public IAttackStrategy CreateRandomAttackAlgorithm(Domain.Values.GameValue gameValue)

@@ -1,10 +1,9 @@
-﻿using rpsls.Application.Entities;
-using rpsls.Domain;
+﻿using rpsls.Domain;
 
 namespace rpsls.Application
 {
     public interface IAttackStrategy
     {
-        Attack GetAttack(MatchResult previousMatchResult);
+        Attack GetAttack();
     }
 }

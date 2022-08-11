@@ -17,20 +17,4 @@
     <ProjectReference Include="..\rpsls.Domain\rpsls.Domain.csproj" />    
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="MLEngines\AttackPredictionML\MLModel.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="MLEngines\PlayerAttackForecastML\MLModel.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="rpsls.player.initial.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="MLEngines\AttackPredictionML\" />
-  </ItemGroup>
-
 </Project>
