@@ -3,60 +3,34 @@ using rpsls.Domain.Enums;
 using rpsls.Domain.Values;
 using rpsls.Infrastructure.Algorithms;
 using rpsls.Infrastructure.Repositories;
-using System;
 
 namespace rpsls.Application
 {
     public class GameService
     {
-        private IAttackStrategy attackStrategy;
-        private GameValue gameValue;
-        private IMatchRepository matchRepository;
+        private readonly IAttackStrategy attackStrategy;
+        private readonly IMatchRepository matchRepository;
 
         public GameService(GameValue gameValue, IMatchRepository matchRepository, IAttackStrategyFactory attackStrategyFactory)
         {
-            this.gameValue = gameValue;
             this.matchRepository = matchRepository;
 
-            attackStrategy = attackStrategyFactory.CreateRandomAttackAlgorithm(gameValue);
+            attackStrategy = attackStrategyFactory.CreateMLAttackAlgorithm(gameValue);
         }
 
         public Attack GetAttack()
         {
-            return attackStrategy.GetAttack();
+            var mlAttackAlgorithm = attackStrategy as MLAttackAlgorithm;
+            mlAttackAlgorithm.TrainContext();
+            return mlAttackAlgorithm.GetAttack();
         }
 
         public void SaveMatchResult(Attack playerOne, Attack playerTwo, AttackResult attackResult)
         {
-            var playerTwoResult = ReverseAttackResult(attackResult);
-            var matchResult = new MatchResult
-            {
-                Id = Guid.NewGuid(),
-                PlayerOne = new PlayerResult
-                {
-                    Id = $"{playerOne.AttackValue.Value}-{attackResult}",
-                    PlayerAttack = playerOne.AttackValue,
-                    AttackResult = attackResult
-                },
-                PlayerTwo = new PlayerResult
-                {
-                    Id = $"{playerTwo.AttackValue.Value}-{playerTwoResult}",
-                    PlayerAttack = playerTwo.AttackValue,
-                    AttackResult = playerTwoResult
-                }
-            };
+            matchRepository.Add(MatchResult.From(playerOne, playerTwo, attackResult));
 
-            matchRepository.Add(matchResult);
-        }
-
-        private AttackResult ReverseAttackResult(AttackResult attackResult)
-        {
-            return attackResult switch
-            {
-                AttackResult.Won => AttackResult.Lost,
-                AttackResult.Lost => AttackResult.Won,
-                _ => AttackResult.Tied
-            };
+            var mlAttackAlgorithm = attackStrategy as MLAttackAlgorithm;
+            mlAttackAlgorithm.SavePlayerAttack(playerOne, playerTwo);
         }
     }
 }
