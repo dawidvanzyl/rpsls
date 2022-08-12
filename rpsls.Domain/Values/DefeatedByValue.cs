@@ -5,24 +5,24 @@ namespace rpsls.Domain.Values
 {
     public sealed class DefeatedByValue : IEquatable<DefeatedByValue>
     {
-        private DefeatedByValue(AttackValue attackValue, string message)
+        private DefeatedByValue(AttackValue attack, string message)
         {
-            AttackValue = attackValue;
+            Attack = attack;
             Message = message;
         }
 
-        public AttackValue AttackValue { get; }
+        public AttackValue Attack { get; }
         public string Message { get; }
 
-        public static DefeatedByValue From(AttackValue attackValue, string message)
+        public static DefeatedByValue From(AttackValue attack, string message)
         {
-            return new DefeatedByValue(attackValue, message);
+            return new DefeatedByValue(attack, message);
         }
 
         public bool Equals([AllowNull] DefeatedByValue other)
         {
             return other != null
-                && AttackValue.Equals(other.AttackValue)
+                && Attack.Equals(other.Attack)
                 && Message.Equals(other.Message);
         }
     }

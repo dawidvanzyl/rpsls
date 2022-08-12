@@ -8,29 +8,29 @@ namespace rpsls.Application
 {
     public class GameService
     {
-        private readonly IAttackStrategy attackStrategy;
+        private readonly IChallangeAlgorithm challangeAlgorithm;
         private readonly IMatchRepository matchRepository;
 
-        public GameService(GameValue gameValue, IMatchRepository matchRepository, IAttackStrategyFactory attackStrategyFactory)
+        public GameService(GameValue gameValue, IMatchRepository matchRepository, IChallangeAlgorithmStrategy challangeAlgorithmStrategy)
         {
             this.matchRepository = matchRepository;
 
-            attackStrategy = attackStrategyFactory.CreateMLAttackAlgorithm(gameValue);
+            challangeAlgorithm = challangeAlgorithmStrategy.CreateMLChallange(gameValue);
         }
 
-        public Attack GetAttack()
+        public ChallangeValue GetChallange()
         {
-            var mlAttackAlgorithm = attackStrategy as MLAttackAlgorithm;
-            mlAttackAlgorithm.TrainContext();
-            return mlAttackAlgorithm.GetAttack();
+            var mlChallangeAlgorithm = challangeAlgorithm as MLChallangeAlgorithm;
+            mlChallangeAlgorithm.TrainContext();
+            return mlChallangeAlgorithm.GetChallange();
         }
 
-        public void SaveMatchResult(Attack playerOne, Attack playerTwo, AttackResult attackResult)
+        public void SaveMatchResult(ChallangeValue playerOne, ChallangeValue playerTwo, ChallangeResult challangeResult)
         {
-            matchRepository.Add(MatchResult.From(playerOne, playerTwo, attackResult));
+            matchRepository.Add(MatchResult.From(playerOne, playerTwo, challangeResult));
 
-            var mlAttackAlgorithm = attackStrategy as MLAttackAlgorithm;
-            mlAttackAlgorithm.SavePlayerAttack(playerOne, playerTwo);
+            var mlChallangeAlgorithm = challangeAlgorithm as MLChallangeAlgorithm;
+            mlChallangeAlgorithm.SaveChallanges(playerOne, playerTwo);
         }
     }
 }

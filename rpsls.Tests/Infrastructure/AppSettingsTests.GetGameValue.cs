@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using rpsls.Domain;
 using rpsls.Domain.Values;
 using System;
 using System.Collections.Generic;
@@ -10,21 +9,6 @@ namespace rpsls.Tests.Infrastructure
     public partial class AppSettingsTests
     {
         [Fact]
-        public void GetGameValue_Throws_ArgumentOutOfRangeException_When_Attack_Configuration_Is_Invalid()
-        {
-            //arrange
-            var appSettings = Make_AppSettings("appsettings.invalidgameattackconfig.json");
-
-            //action
-            Action action = () => appSettings.GetGameValues();
-
-            //assert
-            action.Should()
-                .Throw<ArgumentOutOfRangeException>()
-                .WithMessage($"Configuration cannot be transformed into attacks. (Parameter 'Invalid')");
-        }
-
-        [Fact]
         public void GetGameValue_Reads_Config()
         {
             //arrange
@@ -33,15 +17,29 @@ namespace rpsls.Tests.Infrastructure
             var rockAttack = AttackValue.From("Rock", 1);
             var paperDefeatedByValue = DefeatedByValue.From(AttackValue.From("Paper", 2), "Paper covers Rock.");
             var spockDefeatedByValue = DefeatedByValue.From(AttackValue.From("Spock", 3), "Spock vaporizes Rock.");
-            var attack = Attack.From(rockAttack, new List<DefeatedByValue> { paperDefeatedByValue, spockDefeatedByValue });
-            var expectedGameValue = GameValue.From("Rock-Paper-Scissors", new List<Attack> { attack });
-
+            var challange = ChallangeValue.From(rockAttack, new List<DefeatedByValue> { paperDefeatedByValue, spockDefeatedByValue });
+            var expectedGameValue = GameValue.From("Rock-Paper-Scissors", new List<ChallangeValue> { challange });
 
             //action
-            var gameValues = appSettings.GetGameValues();
+            var gameValues = appSettings.GetGames();
 
-            //assert            
+            //assert
             gameValues.Should().ContainEquivalentOf(expectedGameValue);
+        }
+
+        [Fact]
+        public void GetGameValue_Throws_ArgumentOutOfRangeException_When_Attack_Configuration_Is_Invalid()
+        {
+            //arrange
+            var appSettings = Make_AppSettings("appsettings.invalidgameattackconfig.json");
+
+            //action
+            Action action = () => appSettings.GetGames();
+
+            //assert
+            action.Should()
+                .Throw<ArgumentOutOfRangeException>()
+                .WithMessage($"Configuration cannot be transformed into challanges. (Parameter 'Invalid')");
         }
     }
 }

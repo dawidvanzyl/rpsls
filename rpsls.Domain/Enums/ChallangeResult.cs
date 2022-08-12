@@ -1,6 +1,6 @@
 ﻿namespace rpsls.Domain.Enums
 {
-    public enum AttackResult
+    public enum ChallangeResult
     {
         Lost = -1,
         Tied = 0,

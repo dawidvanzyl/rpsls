@@ -1,4 +1,5 @@
 ﻿using rpsls.Domain.Enums;
+using rpsls.Domain.Values;
 using System;
 
 namespace rpsls.Domain
@@ -11,35 +12,35 @@ namespace rpsls.Domain
 
         public PlayerResult PlayerTwo { get; set; }
 
-        public static MatchResult From(Attack playerOne, Attack playerTwo, AttackResult attackResult)
+        public static MatchResult From(ChallangeValue playerOne, ChallangeValue playerTwo, ChallangeResult challangeResult)
         {
-            var playerTwoResult = ReverseAttackResult(attackResult);
+            var playerTwoResult = ReverseChallangeResult(challangeResult);
 
             return new MatchResult
             {
                 Id = Guid.NewGuid(),
                 PlayerOne = new PlayerResult
                 {
-                    Id = $"{playerOne.AttackValue.Value}-{attackResult}",
-                    PlayerAttack = playerOne.AttackValue,
-                    AttackResult = attackResult
+                    Id = $"{playerOne.Attack.Value}-{challangeResult}",
+                    PlayerAttack = playerOne.Attack,
+                    ChallangeResult = challangeResult
                 },
                 PlayerTwo = new PlayerResult
                 {
-                    Id = $"{playerTwo.AttackValue.Value}-{playerTwoResult}",
-                    PlayerAttack = playerTwo.AttackValue,
-                    AttackResult = playerTwoResult
+                    Id = $"{playerTwo.Attack.Value}-{playerTwoResult}",
+                    PlayerAttack = playerTwo.Attack,
+                    ChallangeResult = playerTwoResult
                 }
             };
         }
 
-        private static AttackResult ReverseAttackResult(AttackResult attackResult)
+        private static ChallangeResult ReverseChallangeResult(ChallangeResult challangeResult)
         {
-            return attackResult switch
+            return challangeResult switch
             {
-                AttackResult.Won => AttackResult.Lost,
-                AttackResult.Lost => AttackResult.Won,
-                _ => AttackResult.Tied
+                ChallangeResult.Won => ChallangeResult.Lost,
+                ChallangeResult.Lost => ChallangeResult.Won,
+                _ => ChallangeResult.Tied
             };
         }
     }

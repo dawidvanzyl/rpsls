@@ -10,14 +10,14 @@ namespace rpsls.Application
     {
         private readonly IDictionary<string, GameService> gameServices;
 
-        public GameServiceFactory(ISettingsRepository settingsRepository, IMatchRepository matchRepository, IAttackStrategyFactory attackStrategyFactory)
+        public GameServiceFactory(ISettingsRepository settingsRepository, IMatchRepository matchRepository, IChallangeAlgorithmStrategy challangeAlgorithmStrategy)
         {
-            var gameValues = settingsRepository.GetGameValues();
+            var gameValues = settingsRepository.GetGames();
 
             gameServices = new Dictionary<string, GameService>();
             foreach (var gameValue in gameValues)
             {
-                gameServices.Add(gameValue.Name, new GameService(gameValue, matchRepository, attackStrategyFactory));
+                gameServices.Add(gameValue.Name, new GameService(gameValue, matchRepository, challangeAlgorithmStrategy));
             }
         }
 

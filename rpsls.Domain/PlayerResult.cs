@@ -5,7 +5,7 @@ namespace rpsls.Domain
 {
     public class PlayerResult
     {
-        public AttackResult AttackResult { get; set; }
+        public ChallangeResult ChallangeResult { get; set; }
 
         public string Id { get; set; }
 

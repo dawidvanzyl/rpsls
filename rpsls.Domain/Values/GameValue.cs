@@ -7,25 +7,25 @@ namespace rpsls.Domain.Values
 {
     public sealed class GameValue : IEquatable<GameValue>
     {
-        private GameValue(string name, IList<Attack> attacks)
+        private GameValue(string name, IList<ChallangeValue> challanges)
         {
             Name = name;
-            Attacks = attacks;
+            Challanges = challanges;
         }
 
-        public IList<Attack> Attacks { get; }
+        public IList<ChallangeValue> Challanges { get; }
         public string Name { get; }
 
-        public static GameValue From(string name, IList<Attack> attacks)
+        public static GameValue From(string name, IList<ChallangeValue> challanges)
         {
-            return new GameValue(name, attacks);
+            return new GameValue(name, challanges);
         }
 
         public bool Equals([AllowNull] GameValue other)
         {
             return other != null
                 && Name.Equals(other.Name)
-                && Attacks.All(attack => other.Attacks.Contains(attack));
+                && Challanges.All(challange => other.Challanges.Contains(challange));
         }
 
         public override string ToString()
