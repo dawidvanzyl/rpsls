@@ -9,19 +9,21 @@ namespace rpsls.Infrastructure.Algorithms.Contexts
 {
     public class MLAlgorithmContext : AlgorithmContext
     {
-        public List<MLModel> AIWins { get; private set; }
-        public List<MLModel> MLChallengeModels { get; private set; }
+        public IList<MLChallengeModel> MLChallengeModels { get; private set; }
+        public IList<MLPlayerAttackModel> MLPlayerAttackModels { get; private set; }
 
         public override void SaveGameRound(GameRound gameRound)
         {
             base.SaveGameRound(gameRound);
 
-            var model = ToMLModel(gameRound);
-            MLChallengeModels.Add(model);
+            //if (gameRound.PlayerOne.ChallengeResult is ChallengeResult.Won or ChallengeResult.Tied)
+            {
+                MLPlayerAttackModels.Add(MLPlayerAttackModel.From(gameRound.GameName, gameRound.PlayerOne));
+            }
 
             if (gameRound.PlayerTwo.ChallengeResult == ChallengeResult.Won)
             {
-                AIWins.Add(model);
+                MLChallengeModels.Add(MLChallengeModel.From(gameRound.GameName, gameRound));
             }
         }
 
@@ -29,19 +31,15 @@ namespace rpsls.Infrastructure.Algorithms.Contexts
         {
             base.LoadPreviousMatches(gameValue, gameRounds);
 
+            MLPlayerAttackModels = GameRounds
+                //.Where(gameRound => gameRound.PlayerOne.ChallengeResult is ChallengeResult.Won or ChallengeResult.Tied)
+                .Select(gameRound => MLPlayerAttackModel.From(gameValue.Name, gameRound.PlayerOne))
+                .ToList();
+
             MLChallengeModels = GameRounds
-                .Select(gameRound => ToMLModel(gameRound))
-                .ToList();
-
-            AIWins = GameRounds
                 .Where(gameRound => gameRound.PlayerTwo.ChallengeResult == ChallengeResult.Won)
-                .Select(gameRound => ToMLModel(gameRound))
+                .Select(gameRound => MLChallengeModel.From(gameValue.Name, gameRound))
                 .ToList();
-        }
-
-        private static MLModel ToMLModel(GameRound gameRound)
-        {
-            return new MLModel { GameName = gameRound.GameName, Player = gameRound.PlayerOne.AttackValue, AI = gameRound.PlayerTwo.AttackValue };
         }
     }
 }
