@@ -11,9 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rpsls.Domain", "rpsls.Domai
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rpsls.Infrastructure", "rpsls.Infrastructure\rpsls.Infrastructure.csproj", "{EAD2DD4E-69A8-4453-B377-5EA0EB03374B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rpsls.Tests", "rpsls.Tests\rpsls.Tests.csproj", "{35FE1A30-8FD8-4D35-8F21-0A862E0AAC18}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rpsls.IoC", "rpsls.IoC\rpsls.IoC.csproj", "{57673645-EBAC-4D1A-9455-D226BA7189B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rpsls.IoC", "rpsls.IoC\rpsls.IoC.csproj", "{57673645-EBAC-4D1A-9455-D226BA7189B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,10 +35,6 @@ Global
 		{EAD2DD4E-69A8-4453-B377-5EA0EB03374B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAD2DD4E-69A8-4453-B377-5EA0EB03374B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAD2DD4E-69A8-4453-B377-5EA0EB03374B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{35FE1A30-8FD8-4D35-8F21-0A862E0AAC18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{35FE1A30-8FD8-4D35-8F21-0A862E0AAC18}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{35FE1A30-8FD8-4D35-8F21-0A862E0AAC18}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{35FE1A30-8FD8-4D35-8F21-0A862E0AAC18}.Release|Any CPU.Build.0 = Release|Any CPU
 		{57673645-EBAC-4D1A-9455-D226BA7189B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{57673645-EBAC-4D1A-9455-D226BA7189B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57673645-EBAC-4D1A-9455-D226BA7189B2}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -6,11 +6,11 @@ using System.Linq;
 
 namespace rpsls.Domain.Values
 {
-    public sealed class ChallangeValue : IComparable<ChallangeValue>, IEquatable<ChallangeValue>
+    public sealed class ChallengeValue : IComparable<ChallengeValue>, IEquatable<ChallengeValue>
     {
         private readonly IList<DefeatedByValue> defeatedByValues;
 
-        private ChallangeValue(AttackValue attack, IList<DefeatedByValue> defeatedByValues)
+        private ChallengeValue(AttackValue attack, IList<DefeatedByValue> defeatedByValues)
         {
             Attack = attack;
             this.defeatedByValues = defeatedByValues;
@@ -18,66 +18,66 @@ namespace rpsls.Domain.Values
 
         public AttackValue Attack { get; }
 
-        public static ChallangeValue From(AttackValue attack, IList<DefeatedByValue> defeatedByValues)
+        public static ChallengeValue From(AttackValue attack, IList<DefeatedByValue> defeatedByValues)
         {
-            return new ChallangeValue(attack, defeatedByValues);
+            return new ChallengeValue(attack, defeatedByValues);
         }
 
-        public static bool operator !=(ChallangeValue left, ChallangeValue right)
+        public static bool operator !=(ChallengeValue left, ChallengeValue right)
         {
             return !(left == right);
         }
 
-        public static bool operator <(ChallangeValue left, ChallangeValue right)
+        public static bool operator <(ChallengeValue left, ChallengeValue right)
         {
             return left is null
                 ? right is null
                 : left.CompareTo(right) < 0;
         }
 
-        public static bool operator <=(ChallangeValue left, ChallangeValue right)
+        public static bool operator <=(ChallengeValue left, ChallengeValue right)
         {
             return left is null
                 ? right is null
                 : left.Equals(right) || left.CompareTo(right) < 0;
         }
 
-        public static bool operator ==(ChallangeValue left, ChallangeValue right)
+        public static bool operator ==(ChallengeValue left, ChallengeValue right)
         {
             return left is null
                 ? right is null
                 : left.Equals(right);
         }
 
-        public static bool operator >(ChallangeValue left, ChallangeValue right)
+        public static bool operator >(ChallengeValue left, ChallengeValue right)
         {
             return left is null
                 ? right is null
                 : left.CompareTo(right) > 0;
         }
 
-        public static bool operator >=(ChallangeValue left, ChallangeValue right)
+        public static bool operator >=(ChallengeValue left, ChallengeValue right)
         {
             return left is null
                 ? right is null
                 : left.Equals(right) || left.CompareTo(right) > 0;
         }
 
-        public int CompareTo(ChallangeValue other)
+        public int CompareTo(ChallengeValue other)
         {
             var isTied = Attack.Equals(other.Attack);
             if (isTied)
             {
-                return (int)ChallangeResult.Tied;
+                return (int)ChallengeResult.Tied;
             }
 
             var hasLost = defeatedByValues.Any(defeatConfig => defeatConfig.Attack.Equals(other.Attack));
             return hasLost
-                ? (int)ChallangeResult.Lost
-                : (int)ChallangeResult.Won;
+                ? (int)ChallengeResult.Lost
+                : (int)ChallengeResult.Won;
         }
 
-        public bool Equals([AllowNull] ChallangeValue other)
+        public bool Equals([AllowNull] ChallengeValue other)
         {
             return other != null
                 && Attack.Equals(other.Attack)
@@ -86,7 +86,7 @@ namespace rpsls.Domain.Values
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as ChallangeValue);
+            return Equals(obj as ChallengeValue);
         }
 
         public string GetDefeatMessage(AttackValue attack)

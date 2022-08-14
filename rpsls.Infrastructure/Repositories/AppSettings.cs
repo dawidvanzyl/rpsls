@@ -12,7 +12,7 @@ namespace rpsls.Infrastructure.Repositories
     {
         IList<AttackValue> GetAttackValues();
 
-        IList<ChallangeValue> GetChallanges();
+        IList<ChallengeValue> GetChallenges();
 
         IList<GameValue> GetGames();
     }
@@ -43,52 +43,52 @@ namespace rpsls.Infrastructure.Repositories
                 .ToList();
         }
 
-        public IList<ChallangeValue> GetChallanges()
+        public IList<ChallengeValue> GetChallenges()
         {
             var attackTypes = GetAttackValues();
             var attackNames = attackTypes.Select(attackValue => attackValue.Name);
 
-            var challangeConfigs = configuration
-                .GetSection("Challanges")
+            var challengeConfigs = configuration
+                .GetSection("Challenges")
                 .GetChildren();
 
-            var allChallangeAttackNames = challangeConfigs.All(challangeConfig => attackNames.Contains(challangeConfig.Key));
-            if (!allChallangeAttackNames)
+            var allChallengeAttackNames = challengeConfigs.All(challengeConfig => attackNames.Contains(challengeConfig.Key));
+            if (!allChallengeAttackNames)
             {
-                throw new InvalidDataException("Challanges configuration contains invalid attack values");
+                throw new InvalidDataException("Challenges configuration contains invalid attack values");
             }
 
-            var challanges = new List<ChallangeValue>();
-            foreach (var challangeConfig in challangeConfigs)
+            var challenges = new List<ChallengeValue>();
+            foreach (var challengeConfig in challengeConfigs)
             {
-                var defeatedByConfigs = challangeConfig
+                var defeatedByConfigs = challengeConfig
                     .GetSection("DefeatedBy")
                     .GetChildren();
 
                 var allDefeatedByAttackNames = defeatedByConfigs.All(defeatedByConfig => attackNames.Contains(defeatedByConfig.Key));
                 if (!allDefeatedByAttackNames)
                 {
-                    throw new InvalidDataException($"DefeatedBy configuration for [{challangeConfig.Key}] contains invalid attack values");
+                    throw new InvalidDataException($"DefeatedBy configuration for [{challengeConfig.Key}] contains invalid attack values");
                 }
 
-                var attack = attackTypes.First(attackValue => attackValue.Name.Equals(challangeConfig.Key));
+                var attack = attackTypes.First(attackValue => attackValue.Name.Equals(challengeConfig.Key));
                 var defeatedByValues = defeatedByConfigs.Select(defeatedByConfig =>
                 {
                     var defeatedBy = attackTypes.First(attackValue => attackValue.Name.Equals(defeatedByConfig.Key));
                     return DefeatedByValue.From(defeatedBy, defeatedByConfig.Value);
                 });
 
-                challanges.Add(ChallangeValue.From(attack, defeatedByValues.ToList()));
+                challenges.Add(ChallengeValue.From(attack, defeatedByValues.ToList()));
             }
 
-            return challanges
-                .OrderBy(challange => challange.Attack.Value)
+            return challenges
+                .OrderBy(challenge => challenge.Attack.Value)
                 .ToList();
         }
 
         public IList<GameValue> GetGames()
         {
-            var challanges = GetChallanges();
+            var challenges = GetChallenges();
             var gameConfigurations = configuration
                 .GetSection("Game")
                 .GetChildren();
@@ -96,19 +96,19 @@ namespace rpsls.Infrastructure.Repositories
             var gameValues = new List<GameValue>();
             foreach (var gameConfiguration in gameConfigurations)
             {
-                var lastChallangeIndex = Convert.ToByte(gameConfiguration.Value);
-                var gameChallanges = challanges.Where(challange => challange.Attack.Value <= lastChallangeIndex);
+                var lastChallengeIndex = Convert.ToByte(gameConfiguration.Value);
+                var gameChallenges = challenges.Where(challenge => challenge.Attack.Value <= lastChallengeIndex);
 
-                var challangeIndexValid = gameChallanges
+                var challengeIndexValid = gameChallenges
                     .Count()
-                    .Equals(lastChallangeIndex);
+                    .Equals(lastChallengeIndex);
 
-                if (!challangeIndexValid)
+                if (!challengeIndexValid)
                 {
-                    throw new ArgumentOutOfRangeException(gameConfiguration.Key, "Configuration cannot be transformed into challanges.");
+                    throw new ArgumentOutOfRangeException(gameConfiguration.Key, "Configuration cannot be transformed into challenges.");
                 }
 
-                gameValues.Add(GameValue.From(gameConfiguration.Key, gameChallanges.ToList()));
+                gameValues.Add(GameValue.From(gameConfiguration.Key, gameChallenges.ToList()));
             }
 
             return gameValues;

@@ -1,5 +1,6 @@
 ﻿using rpsls.Domain.Values;
 using rpsls.Infrastructure.Algorithms;
+using rpsls.Infrastructure.Factories;
 using rpsls.Infrastructure.Repositories;
 using System;
 using System.Collections.Generic;
@@ -10,14 +11,14 @@ namespace rpsls.Application
     {
         private readonly IDictionary<string, GameService> gameServices;
 
-        public GameServiceFactory(ISettingsRepository settingsRepository, IMatchRepository matchRepository, IChallangeAlgorithmStrategy challangeAlgorithmStrategy)
+        public GameServiceFactory(ISettingsRepository settingsRepository, IMatchRepository matchRepository, IAlgorithmContextFactory algorithmContextFactory, IChallengeAlgorithmStrategy challengeAlgorithmStrategy)
         {
             var gameValues = settingsRepository.GetGames();
 
             gameServices = new Dictionary<string, GameService>();
             foreach (var gameValue in gameValues)
             {
-                gameServices.Add(gameValue.Name, new GameService(gameValue, matchRepository, challangeAlgorithmStrategy));
+                gameServices.Add(gameValue.Name, new GameService(gameValue, matchRepository, algorithmContextFactory, challengeAlgorithmStrategy));
             }
         }
 

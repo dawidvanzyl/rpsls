@@ -2,35 +2,37 @@
 using rpsls.Domain.Enums;
 using rpsls.Domain.Values;
 using rpsls.Infrastructure.Algorithms;
+using rpsls.Infrastructure.Algorithms.Contexts;
+using rpsls.Infrastructure.Factories;
 using rpsls.Infrastructure.Repositories;
 
 namespace rpsls.Application
 {
     public class GameService
     {
-        private readonly IChallangeAlgorithm challangeAlgorithm;
+        private readonly MLAlgorithmContext algorithmContext;
+        private readonly IChallengeAlgorithm<MLAlgorithmContext> challengeAlgorithm;
         private readonly IMatchRepository matchRepository;
 
-        public GameService(GameValue gameValue, IMatchRepository matchRepository, IChallangeAlgorithmStrategy challangeAlgorithmStrategy)
+        public GameService(GameValue gameValue, IMatchRepository matchRepository, IAlgorithmContextFactory algorithmContextFactory, IChallengeAlgorithmStrategy challengeAlgorithmStrategy)
         {
             this.matchRepository = matchRepository;
 
-            challangeAlgorithm = challangeAlgorithmStrategy.CreateMLChallange(gameValue);
+            algorithmContext = algorithmContextFactory.CreateMLAlgorithmContext();
+            challengeAlgorithm = challengeAlgorithmStrategy.CreateMLChallenge(gameValue);
         }
 
-        public ChallangeValue GetChallange()
+        public ChallengeValue GetChallenge()
         {
-            var mlChallangeAlgorithm = challangeAlgorithm as MLChallangeAlgorithm;
-            mlChallangeAlgorithm.TrainContext();
-            return mlChallangeAlgorithm.GetChallange();
+            return challengeAlgorithm.GetChallenge(algorithmContext);
         }
 
-        public void SaveMatchResult(ChallangeValue playerOne, ChallangeValue playerTwo, ChallangeResult challangeResult)
+        public void SaveMatchResult(ChallengeValue playerOne, ChallengeValue playerTwo, ChallengeResult challengeResult)
         {
-            matchRepository.Add(MatchResult.From(playerOne, playerTwo, challangeResult));
+            var gameRound = GameRound.From(playerOne, playerTwo, challengeResult);
 
-            var mlChallangeAlgorithm = challangeAlgorithm as MLChallangeAlgorithm;
-            mlChallangeAlgorithm.SaveChallanges(playerOne, playerTwo);
+            algorithmContext.SaveGameRound(gameRound);
+            matchRepository.Add(gameRound);
         }
     }
 }

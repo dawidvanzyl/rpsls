@@ -49,32 +49,41 @@ namespace rpsls.Console
                     Prompt.ColorSchema.Answer = ConsoleColor.Black;
                 }
 
-                var player1 = Prompt.Select($"{player1Name} please select you attack", gameValue.Challanges);
-                var player2 = twoPlayerGame
-                    ? Prompt.Select($"{player2Name} please select you attack", gameValue.Challanges)
-                    : gameService.GetChallange();
+                var player1 = Prompt.Select($"{player1Name} please select you attack", gameValue.Challenges);
+
+                ChallengeValue player2;
+                if (twoPlayerGame)
+                {
+                    player2 = Prompt.Select($"{player2Name} please select you attack", gameValue.Challenges);
+                }
+                else
+                {
+                    System.Console.WriteLine("Computer is deciding on an attack...");
+                    System.Console.WriteLine("");
+                    player2 = gameService.GetChallenge();
+                }
 
                 System.Console.WriteLine("");
                 System.Console.WriteLine($"{player1Name} attacked with {player1}");
                 System.Console.WriteLine($"{player2Name} attacked with {player2}");
                 System.Console.WriteLine("");
 
-                var challangeResult = (ChallangeResult)player1.CompareTo(player2);
-                gameService.SaveMatchResult(player1, player2, challangeResult);
-                switch (challangeResult)
+                var challengeResult = (ChallengeResult)player1.CompareTo(player2);
+                gameService.SaveMatchResult(player1, player2, challengeResult);
+                switch (challengeResult)
                 {
-                    case ChallangeResult.Won:
+                    case ChallengeResult.Won:
                         System.Console.WriteLine(player2.GetDefeatMessage(player1.Attack));
-                        System.Console.WriteLine($"{player1Name} {ChallangeResult.Won.ToString().ToUpper()}");
+                        System.Console.WriteLine($"{player1Name} {ChallengeResult.Won.ToString().ToUpper()}");
                         break;
 
-                    case ChallangeResult.Tied:
-                        System.Console.WriteLine($"Match {ChallangeResult.Tied.ToString().ToUpper()}");
+                    case ChallengeResult.Tied:
+                        System.Console.WriteLine($"Match {ChallengeResult.Tied.ToString().ToUpper()}");
                         break;
 
-                    case ChallangeResult.Lost:
+                    case ChallengeResult.Lost:
                         System.Console.WriteLine(player1.GetDefeatMessage(player2.Attack));
-                        System.Console.WriteLine($"{player2Name} {ChallangeResult.Won.ToString().ToUpper()}");
+                        System.Console.WriteLine($"{player2Name} {ChallengeResult.Won.ToString().ToUpper()}");
                         break;
                 }
 

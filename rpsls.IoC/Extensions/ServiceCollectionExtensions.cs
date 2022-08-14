@@ -13,7 +13,10 @@ namespace rpsls.IoC.Extensions
             services
                 .AddSingleton<GameServiceFactory>()
                 .AddSingleton<GameService>()
-                .AddSingleton<IChallangeAlgorithmStrategy, ChallangeAlgorithmStrategy>()
+                .AddSingleton<IAlgorithmContextFactory, AlgorithmContextFactory>()
+                .AddSingleton<IChallengeAlgorithmStrategy, ChallengeAlgorithmStrategy>()
+                .AddTransient<MLChallengeAlgorithm>()
+                .AddTransient<RandomChallengeAlgorithm>()
                 .AddSingleton<IMatchRepository, MatchFileRepository>()
                 .AddSingleton<IConfigurationFactory, ConfigurationFactory>()
                 .AddSingleton<ISettingsRepository, AppSettings>();
