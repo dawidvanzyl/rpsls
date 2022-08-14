@@ -6,19 +6,22 @@ namespace rpsls.Domain
 {
     public class GameRound
     {
+        public string GameName { get; set; }
+
         public Guid Id { get; set; }
 
         public Challenge PlayerOne { get; set; }
 
         public Challenge PlayerTwo { get; set; }
 
-        public static GameRound From(ChallengeValue playerOne, ChallengeValue playerTwo, ChallengeResult challengeResult)
+        public static GameRound From(GameValue gameValue, ChallengeValue playerOne, ChallengeValue playerTwo, ChallengeResult challengeResult)
         {
             var playerTwoResult = ReverseChallengeResult(challengeResult);
 
             return new GameRound
             {
                 Id = Guid.NewGuid(),
+                GameName = gameValue.Name,
                 PlayerOne = new Challenge
                 {
                     Id = $"{playerOne.Attack.Value}-{challengeResult}",

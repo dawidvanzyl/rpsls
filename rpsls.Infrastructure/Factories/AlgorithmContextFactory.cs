@@ -1,13 +1,14 @@
-﻿using rpsls.Infrastructure.Algorithms.Contexts;
+﻿using rpsls.Domain.Values;
+using rpsls.Infrastructure.Algorithms.Contexts;
 using rpsls.Infrastructure.Repositories;
 
 namespace rpsls.Infrastructure.Factories
 {
     public interface IAlgorithmContextFactory
     {
-        AlgorithmContext CreateAlgorithmContext();
+        AlgorithmContext CreateAlgorithmContext(GameValue gameValue);
 
-        MLAlgorithmContext CreateMLAlgorithmContext();
+        MLAlgorithmContext CreateMLAlgorithmContext(GameValue gameValue);
     }
 
     public class AlgorithmContextFactory : IAlgorithmContextFactory
@@ -19,18 +20,23 @@ namespace rpsls.Infrastructure.Factories
             this.matchRepository = matchRepository;
         }
 
-        public AlgorithmContext CreateAlgorithmContext()
+        public AlgorithmContext CreateAlgorithmContext(GameValue gameValue)
         {
-            var context = new AlgorithmContext(matchRepository);
-            context.LoadMatchResults();
-
-            return context;
+            return CreateAlgorithmContext<AlgorithmContext>(gameValue);
         }
 
-        public MLAlgorithmContext CreateMLAlgorithmContext()
+        public MLAlgorithmContext CreateMLAlgorithmContext(GameValue gameValue)
         {
-            var context = new MLAlgorithmContext(matchRepository);
-            context.LoadMatchResults();
+            return CreateAlgorithmContext<MLAlgorithmContext>(gameValue);
+        }
+
+        private TAlgorithmContext CreateAlgorithmContext<TAlgorithmContext>(GameValue gameValue)
+                    where TAlgorithmContext : AlgorithmContext, new()
+        {
+            var context = new TAlgorithmContext();
+
+            var previousMatches = matchRepository.GetAllByGameName(gameValue.Name);
+            context.LoadPreviousMatches(gameValue, previousMatches);
 
             return context;
         }

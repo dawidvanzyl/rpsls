@@ -12,13 +12,15 @@ namespace rpsls.Application
     {
         private readonly MLAlgorithmContext algorithmContext;
         private readonly IChallengeAlgorithm<MLAlgorithmContext> challengeAlgorithm;
+        private readonly GameValue gameValue;
         private readonly IMatchRepository matchRepository;
 
         public GameService(GameValue gameValue, IMatchRepository matchRepository, IAlgorithmContextFactory algorithmContextFactory, IChallengeAlgorithmStrategy challengeAlgorithmStrategy)
         {
+            this.gameValue = gameValue;
             this.matchRepository = matchRepository;
 
-            algorithmContext = algorithmContextFactory.CreateMLAlgorithmContext();
+            algorithmContext = algorithmContextFactory.CreateMLAlgorithmContext(gameValue);
             challengeAlgorithm = challengeAlgorithmStrategy.CreateMLChallenge(gameValue);
         }
 
@@ -29,9 +31,10 @@ namespace rpsls.Application
 
         public void SaveMatchResult(ChallengeValue playerOne, ChallengeValue playerTwo, ChallengeResult challengeResult)
         {
-            var gameRound = GameRound.From(playerOne, playerTwo, challengeResult);
+            var gameRound = GameRound.From(gameValue, playerOne, playerTwo, challengeResult);
 
             algorithmContext.SaveGameRound(gameRound);
+
             matchRepository.Add(gameRound);
         }
     }

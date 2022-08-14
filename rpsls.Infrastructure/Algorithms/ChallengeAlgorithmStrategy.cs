@@ -4,15 +4,14 @@ using rpsls.Infrastructure.Algorithms.Contexts;
 using rpsls.Infrastructure.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace rpsls.Infrastructure.Algorithms
 {
     public interface IChallengeAlgorithmStrategy
     {
-        IChallengeAlgorithm<MLAlgorithmContext> CreateMLChallenge(GameValue gameValue);
+        MLChallengeAlgorithm CreateMLChallenge(GameValue gameValue);
 
-        IChallengeAlgorithm<AlgorithmContext> CreateRandomChallenge(GameValue gameValue);
+        RandomChallengeAlgorithm CreateRandomChallenge(GameValue gameValue);
     }
 
     public class ChallengeAlgorithmStrategy : IChallengeAlgorithmStrategy
@@ -32,19 +31,19 @@ namespace rpsls.Infrastructure.Algorithms
 
             void SetupChallenges(GameValue gameValue, IChallengeAlgorithm challengeAlgorithm)
             {
-                challengeAlgorithm.SetupChallenges(gameValue.Challenges.ToArray());
+                challengeAlgorithm.SetupChallenges(gameValue);
                 challengeStrategies.Add($"{gameValue.Name}_{challengeAlgorithm.GetType().Name}", challengeAlgorithm);
             }
         }
 
-        public IChallengeAlgorithm<MLAlgorithmContext> CreateMLChallenge(GameValue gameValue)
+        public MLChallengeAlgorithm CreateMLChallenge(GameValue gameValue)
         {
-            return GetAlgorithm<MLAlgorithmContext>($"{gameValue.Name}_{nameof(MLChallengeAlgorithm)}");
+            return GetAlgorithm<MLAlgorithmContext>($"{gameValue.Name}_{nameof(MLChallengeAlgorithm)}") as MLChallengeAlgorithm;
         }
 
-        public IChallengeAlgorithm<AlgorithmContext> CreateRandomChallenge(GameValue gameValue)
+        public RandomChallengeAlgorithm CreateRandomChallenge(GameValue gameValue)
         {
-            return GetAlgorithm<AlgorithmContext>($"{gameValue.Name}_{nameof(RandomChallengeAlgorithm)}");
+            return GetAlgorithm<AlgorithmContext>($"{gameValue.Name}_{nameof(RandomChallengeAlgorithm)}") as RandomChallengeAlgorithm;
         }
 
         private IChallengeAlgorithm<TAlgorithmContext> GetAlgorithm<TAlgorithmContext>(string algorithmKey)

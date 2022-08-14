@@ -1,11 +1,12 @@
 ﻿using rpsls.Domain.Values;
 using rpsls.Infrastructure.Algorithms.Contexts;
+using System.Linq;
 
 namespace rpsls.Infrastructure.Algorithms
 {
     public interface IChallengeAlgorithm
     {
-        void SetupChallenges(ChallengeValue[] challenges);
+        void SetupChallenges(GameValue gameValue);
     }
 
     public interface IChallengeAlgorithm<in TAlgorithmContext> : IChallengeAlgorithm
@@ -25,9 +26,9 @@ namespace rpsls.Infrastructure.Algorithms
 
         public abstract ChallengeValue GetChallenge(TAlgorithmContext context);
 
-        public virtual void SetupChallenges(ChallengeValue[] challenges)
+        public virtual void SetupChallenges(GameValue gameValue)
         {
-            this.challenges = challenges;
+            this.challenges = gameValue.Challenges.ToArray();
         }
     }
 }

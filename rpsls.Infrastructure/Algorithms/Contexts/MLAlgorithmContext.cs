@@ -1,7 +1,7 @@
 ﻿using rpsls.Domain;
 using rpsls.Domain.Enums;
+using rpsls.Domain.Values;
 using rpsls.Infrastructure.Algorithms.Models;
-using rpsls.Infrastructure.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,11 +9,6 @@ namespace rpsls.Infrastructure.Algorithms.Contexts
 {
     public class MLAlgorithmContext : AlgorithmContext
     {
-        public MLAlgorithmContext(IMatchRepository matchRepository)
-            : base(matchRepository)
-        {
-        }
-
         public List<MLModel> AIWins { get; private set; }
         public List<MLModel> MLChallengeModels { get; private set; }
 
@@ -30,9 +25,9 @@ namespace rpsls.Infrastructure.Algorithms.Contexts
             }
         }
 
-        internal override void LoadMatchResults()
+        internal override void LoadPreviousMatches(GameValue gameValue, IList<GameRound> gameRounds)
         {
-            base.LoadMatchResults();
+            base.LoadPreviousMatches(gameValue, gameRounds);
 
             MLChallengeModels = GameRounds
                 .Select(gameRound => ToMLModel(gameRound))
@@ -46,7 +41,7 @@ namespace rpsls.Infrastructure.Algorithms.Contexts
 
         private static MLModel ToMLModel(GameRound gameRound)
         {
-            return new MLModel { Player = gameRound.PlayerOne.AttackValue, AI = gameRound.PlayerTwo.AttackValue };
+            return new MLModel { GameName = gameRound.GameName, Player = gameRound.PlayerOne.AttackValue, AI = gameRound.PlayerTwo.AttackValue };
         }
     }
 }

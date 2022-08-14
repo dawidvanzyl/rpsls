@@ -10,18 +10,25 @@ namespace rpsls.Infrastructure.Algorithms
 {
     public class RandomChallengeAlgorithm : AbstractChallengeAlgorithm<AlgorithmContext>
     {
+        private bool defaultsAdded;
+
         public RandomChallengeAlgorithm()
         {
         }
 
         public override ChallengeValue GetChallenge(AlgorithmContext context)
         {
-            var gameRounds = context.GameRounds as List<GameRound>;
-            gameRounds.AddRange(challenges
-                .SelectMany(player => challenges
-                    .Select(ai => GameRound.From(player, ai, (ChallengeResult)player.CompareTo(ai)))));
+            if (!defaultsAdded)
+            {
+                var gameRounds = context.GameRounds as List<GameRound>;
+                gameRounds.AddRange(challenges
+                    .SelectMany(player => challenges
+                    .Select(ai => GameRound.From(context.GameValue, player, ai, (ChallengeResult)player.CompareTo(ai)))));
 
-            var winRounds = gameRounds
+                defaultsAdded = true;
+            }
+
+            var winRounds = context.GameRounds
                 .Where(gameRound => gameRound.PlayerTwo.ChallengeResult == ChallengeResult.Won);
 
             var upscaledChallengeLimit = (winRounds.Count() - 1) * 100;

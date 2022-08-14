@@ -1,28 +1,24 @@
 ﻿using rpsls.Domain;
-using rpsls.Infrastructure.Repositories;
+using rpsls.Domain.Values;
 using System.Collections.Generic;
 
 namespace rpsls.Infrastructure.Algorithms.Contexts
 {
     public class AlgorithmContext
     {
-        private readonly IMatchRepository matchRepository;
-
-        public AlgorithmContext(IMatchRepository matchRepository)
-        {
-            this.matchRepository = matchRepository;
-        }
-
         public IList<GameRound> GameRounds { get; private set; }
+
+        public GameValue GameValue { get; private set; }
 
         public virtual void SaveGameRound(GameRound gameRound)
         {
             GameRounds.Add(gameRound);
         }
 
-        internal virtual void LoadMatchResults()
+        internal virtual void LoadPreviousMatches(GameValue gameValue, IList<GameRound> gameRounds)
         {
-            GameRounds = matchRepository.GetAll();
+            GameValue = gameValue;
+            GameRounds = gameRounds;
         }
     }
 }
