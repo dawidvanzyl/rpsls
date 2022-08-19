@@ -18,7 +18,6 @@ namespace rpsls.IoC.Extensions
                 .AddTransient<MLChallengeAlgorithm>()
                 .AddTransient<RandomChallengeAlgorithm>()
                 .AddSingleton<IMatchRepository, MatchFileRepository>()
-                .AddSingleton<IPredictionRepository, PredictionFileRepository>()
                 .AddSingleton<IConfigurationFactory, ConfigurationFactory>()
                 .AddSingleton<ISettingsRepository, AppSettings>();
 
