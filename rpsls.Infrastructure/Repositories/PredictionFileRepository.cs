@@ -6,9 +6,9 @@ namespace rpsls.Infrastructure.Repositories
 {
     public interface IPredictionRepository
     {
-        void AddAIPrediction(MLChallengeModel model);
+        void AddAIPrediction(MLModel model);
 
-        void AddPlayerPrediction(MLPlayerAttackModel model);
+        void AddPlayerPrediction(MLModel model);
     }
 
     public class PredictionFileRepository : IPredictionRepository
@@ -21,21 +21,21 @@ namespace rpsls.Infrastructure.Repositories
             connectionString = configuration.GetSection("ConnectionStrings:MLDb").Value;
         }
 
-        public void AddAIPrediction(MLChallengeModel model)
+        public void AddAIPrediction(MLModel model)
         {
             using (var db = new LiteDatabase(connectionString))
             {
-                var collection = db.GetCollection<MLChallengeModel>($"AIPredictions");
+                var collection = db.GetCollection<MLModel>($"AIPredictions");
 
                 collection.Insert(model);
             }
         }
 
-        public void AddPlayerPrediction(MLPlayerAttackModel model)
+        public void AddPlayerPrediction(MLModel model)
         {
             using (var db = new LiteDatabase(connectionString))
             {
-                var collection = db.GetCollection<MLPlayerAttackModel>($"PlayerPredictions");
+                var collection = db.GetCollection<MLModel>($"PlayerPredictions");
 
                 collection.Insert(model);
             }
