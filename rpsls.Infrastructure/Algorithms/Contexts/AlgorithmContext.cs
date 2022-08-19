@@ -1,6 +1,8 @@
 ﻿using rpsls.Domain;
+using rpsls.Domain.Enums;
 using rpsls.Domain.Values;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace rpsls.Infrastructure.Algorithms.Contexts
 {
@@ -19,6 +21,10 @@ namespace rpsls.Infrastructure.Algorithms.Contexts
         {
             GameValue = gameValue;
             GameRounds = gameRounds;
+
+            (GameRounds as List<GameRound>).AddRange(gameValue.Challenges
+                .SelectMany(player => gameValue.Challenges
+                .Select(ai => GameRound.From(gameValue, player, ai, (ChallengeResult)player.CompareTo(ai)))));
         }
     }
 }

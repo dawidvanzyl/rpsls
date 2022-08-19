@@ -31,7 +31,7 @@ namespace rpsls.Infrastructure.Algorithms
 
             void SetupChallenges(GameValue gameValue, IChallengeAlgorithm challengeAlgorithm)
             {
-                challengeAlgorithm.SetupChallenges(gameValue);
+                challengeAlgorithm.SetGameValue(gameValue);
                 challengeStrategies.Add($"{gameValue.Name}_{challengeAlgorithm.GetType().Name}", challengeAlgorithm);
             }
         }

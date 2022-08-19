@@ -1,5 +1,4 @@
 ﻿using rpsls.Domain;
-using rpsls.Domain.Enums;
 using rpsls.Domain.Values;
 using rpsls.Infrastructure.Algorithms.Models;
 using System.Collections.Generic;
@@ -9,39 +8,25 @@ namespace rpsls.Infrastructure.Algorithms.Contexts
 {
     public class MLAlgorithmContext : AlgorithmContext
     {
-        public List<MLModel> AIWins { get; private set; }
-        public List<MLModel> MLChallengeModels { get; private set; }
+        public uint? LastAIChallange { get; private set; }
+        public IList<MLModel> MLModels { get; private set; }
 
         public override void SaveGameRound(GameRound gameRound)
         {
             base.SaveGameRound(gameRound);
 
-            var model = ToMLModel(gameRound);
-            MLChallengeModels.Add(model);
+            MLModels.Add(MLModel.From(gameRound.GameName, gameRound));
 
-            if (gameRound.PlayerTwo.ChallengeResult == ChallengeResult.Won)
-            {
-                AIWins.Add(model);
-            }
+            LastAIChallange = MLModels.Last().AI;
         }
 
         internal override void LoadPreviousMatches(GameValue gameValue, IList<GameRound> gameRounds)
         {
             base.LoadPreviousMatches(gameValue, gameRounds);
 
-            MLChallengeModels = GameRounds
-                .Select(gameRound => ToMLModel(gameRound))
+            MLModels = GameRounds
+                .Select(gameRound => MLModel.From(gameValue.Name, gameRound))
                 .ToList();
-
-            AIWins = GameRounds
-                .Where(gameRound => gameRound.PlayerTwo.ChallengeResult == ChallengeResult.Won)
-                .Select(gameRound => ToMLModel(gameRound))
-                .ToList();
-        }
-
-        private static MLModel ToMLModel(GameRound gameRound)
-        {
-            return new MLModel { GameName = gameRound.GameName, Player = gameRound.PlayerOne.AttackValue, AI = gameRound.PlayerTwo.AttackValue };
         }
     }
 }

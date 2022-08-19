@@ -6,7 +6,6 @@ using rpsls.Domain.Values;
 using rpsls.Infrastructure.Algorithms.Contexts;
 using rpsls.Infrastructure.Algorithms.Models;
 using rpsls.Infrastructure.Repositories;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace rpsls.Infrastructure.Algorithms
@@ -16,19 +15,16 @@ namespace rpsls.Infrastructure.Algorithms
         private readonly MLContext mlContext;
         private readonly IPredictionRepository predictionRepository;
         private readonly RandomChallengeAlgorithm randomChallengeAlgorithm;
-        private bool challangeTrainModelsAdded;
-        private MatrixFactorizationTrainer.Options gameTrainerOptions;
-        private GameValue gameValue;
-        private IList<(MLModel Model, ChallengeResult ChallengeResult)> trainingModels;
-        private MatrixFactorizationTrainer winTrainer;
-        private bool winTrainModelsAdded;
+        private MatrixFactorizationTrainer challengeTrainer;
+        private MatrixFactorizationTrainer playerTrainer;
+        private MatrixFactorizationTrainer.Options playerTrainerOptions;
 
         public MLChallengeAlgorithm(RandomChallengeAlgorithm randomChallengeAlgorithm, IPredictionRepository predictionRepository)
         {
             mlContext = new MLContext();
 
-            CreateWinTrainer();
-            CreateGameTrainerOptions();
+            CreateChallangeTrainer();
+            CreatePlayerTrainerOptions();
 
             this.randomChallengeAlgorithm = randomChallengeAlgorithm;
             this.predictionRepository = predictionRepository;
@@ -36,172 +32,123 @@ namespace rpsls.Infrastructure.Algorithms
 
         public override ChallengeValue GetChallenge(MLAlgorithmContext context)
         {
-            var winPredictionEngine = CreateWinPredictionEngine(context);
+            //if (!context.LastAIChallange.HasValue)
+            //{
+            //    return randomChallengeAlgorithm.GetChallenge(context);
+            //}
+
+            var challangePredictionEngine = CreateChallengePredictionEngine(context);
             var playerPredictionEngine = CreatePlayerPredictionEngine(context);
 
             var predictedPlayerChallenge = GetPlayerChallenge(playerPredictionEngine);
 
-            if (predictedPlayerChallenge == null)
-            {
-                return randomChallengeAlgorithm.GetChallenge(context);
-            }
+            var aiChallenge = GetAIChallenge(challangePredictionEngine, predictedPlayerChallenge);
 
-            var aiChallenge = GetAIChallenge(winPredictionEngine, predictedPlayerChallenge);
-
-            return aiChallenge == null
-                ? randomChallengeAlgorithm.GetChallenge(context)
-                : aiChallenge;
+            return aiChallenge;
         }
 
-        public override void SetupChallenges(GameValue gameValue)
+        public override void SetGameValue(GameValue gameValue)
         {
-            base.SetupChallenges(gameValue);
+            base.SetGameValue(gameValue);
 
-            this.gameValue = gameValue;
-
-            randomChallengeAlgorithm.SetupChallenges(gameValue);
-
-            trainingModels = challenges
-                .SelectMany(player => challenges
-                    .Select(ai =>
-                    (
-                        new MLModel { Player = player.Attack.Value, AI = ai.Attack.Value },
-                        (ChallengeResult)player.CompareTo(ai)
-                    )))
-                .ToList();
+            randomChallengeAlgorithm.SetGameValue(gameValue);
         }
 
-        private void CreateGameTrainerOptions()
+        private void CreateChallangeTrainer()
         {
-            gameTrainerOptions = new MatrixFactorizationTrainer.Options();
-            gameTrainerOptions.MatrixColumnIndexColumnName = nameof(MLModel.Player);
-            gameTrainerOptions.MatrixRowIndexColumnName = nameof(MLModel.AI);
-            gameTrainerOptions.LabelColumnName = nameof(MLModel.Score);
-            gameTrainerOptions.LossFunction = MatrixFactorizationTrainer.LossFunctionType.SquareLossOneClass;
-            gameTrainerOptions.Quiet = true;
-            //For better results use the following parameters
-            //options.ApproximationRank = 100;
-            //options.C = 0.00001;
+            var challengeOptions = new MatrixFactorizationTrainer.Options();
+            challengeOptions.MatrixColumnIndexColumnName = nameof(MLModel.Player);
+            challengeOptions.MatrixRowIndexColumnName = nameof(MLModel.AI);
+            challengeOptions.LabelColumnName = nameof(MLModel.Score);
+            challengeOptions.LossFunction = MatrixFactorizationTrainer.LossFunctionType.SquareLossOneClass;
+            challengeOptions.Alpha = 0.01;
+            challengeOptions.Lambda = 0.025;
+            challengeOptions.Quiet = true;
+
+            challengeTrainer = mlContext
+                .Recommendation()
+                .Trainers
+                .MatrixFactorization(challengeOptions);
+        }
+
+        private PredictionEngine<MLModel, MLPrediction> CreateChallengePredictionEngine(MLAlgorithmContext context)
+        {
+            var playerLoses = context.MLModels.Where(model => model.ChallangeResult is (int)ChallengeResult.Lost);
+
+            var dataView = mlContext.Data.LoadFromEnumerable(playerLoses, SchemaDefinition.Create(typeof(MLModel)));
+            ITransformer transformer = challengeTrainer.Fit(dataView);
+            return mlContext.Model.CreatePredictionEngine<MLModel, MLPrediction>(transformer);
         }
 
         private PredictionEngine<MLModel, MLPrediction> CreatePlayerPredictionEngine(MLAlgorithmContext context)
         {
-            if (!challangeTrainModelsAdded)
-            {
-                var challengeModels = trainingModels
-                    .Select(trainingModel => trainingModel.Model);
-
-                context.MLChallengeModels
-                    .AddRange(challengeModels);
-
-                challangeTrainModelsAdded = true;
-            }
-
-            gameTrainerOptions.Alpha = (double)context.MLChallengeModels.Count / (double)context.AIWins.Count;
-            gameTrainerOptions.Lambda = (double)context.AIWins.Count / 10;
-
-            var gameTrainer = mlContext
-                .Recommendation()
-                .Trainers
-                .MatrixFactorization(gameTrainerOptions);
-
-            var playerPredictionEngine = CreatePredictionEngine(context.MLChallengeModels, gameTrainer);
-            return playerPredictionEngine;
-        }
-
-        private PredictionEngine<MLModel, MLPrediction> CreatePredictionEngine(IEnumerable<MLModel> models, MatrixFactorizationTrainer trainer)
-        {
-            var gameSchema = SchemaDefinition.Create(typeof(MLModel));
-            var dataView = mlContext.Data.LoadFromEnumerable(models, gameSchema);
-            ITransformer transformer = trainer.Fit(dataView);
+            var dataView = mlContext.Data.LoadFromEnumerable(context.MLModels.TakeLast(10), SchemaDefinition.Create(typeof(MLModel)));
+            ITransformer transformer = playerTrainer.Fit(dataView);
             return mlContext.Model.CreatePredictionEngine<MLModel, MLPrediction>(transformer);
         }
 
-        private PredictionEngine<MLModel, MLPrediction> CreateWinPredictionEngine(MLAlgorithmContext context)
+        private void CreatePlayerTrainerOptions()
         {
-            if (!winTrainModelsAdded)
-            {
-                var winModels = trainingModels
-                .Where(trainingModel => trainingModel.ChallengeResult == ChallengeResult.Lost)
-                .Select(trainingModel => trainingModel.Model);
+            playerTrainerOptions = new MatrixFactorizationTrainer.Options();
+            playerTrainerOptions.MatrixColumnIndexColumnName = nameof(MLModel.Player);
+            playerTrainerOptions.MatrixRowIndexColumnName = nameof(MLModel.AI);
+            playerTrainerOptions.LabelColumnName = nameof(MLModel.Score);
+            playerTrainerOptions.LossFunction = MatrixFactorizationTrainer.LossFunctionType.SquareLossOneClass;
+            playerTrainerOptions.ApproximationRank = 10;
+            playerTrainerOptions.LearningRate = 10;
+            playerTrainerOptions.Alpha = 0.01;
+            playerTrainerOptions.Lambda = 0.025;
+            playerTrainerOptions.Quiet = true;
 
-                context.AIWins
-                    .AddRange(winModels);
-
-                winTrainModelsAdded = true;
-            }
-
-            var winPredictionEngine = CreatePredictionEngine(context.AIWins, winTrainer);
-            return winPredictionEngine;
-        }
-
-        private void CreateWinTrainer()
-        {
-            var winOptions = new MatrixFactorizationTrainer.Options();
-            winOptions.MatrixColumnIndexColumnName = nameof(MLModel.Player);
-            winOptions.MatrixRowIndexColumnName = nameof(MLModel.AI);
-            winOptions.LabelColumnName = nameof(MLModel.Score);
-            winOptions.LossFunction = MatrixFactorizationTrainer.LossFunctionType.SquareLossOneClass;
-            winOptions.Alpha = 0.01;
-            winOptions.Lambda = 0.025;
-            winOptions.Quiet = true;
-
-            winTrainer = mlContext
+            playerTrainer = mlContext
                 .Recommendation()
                 .Trainers
-                .MatrixFactorization(winOptions);
+                .MatrixFactorization(playerTrainerOptions);
         }
 
-        private ChallengeValue GetAIChallenge(PredictionEngine<MLModel, MLPrediction> winPredictionEngine, ChallengeValue expectedChallenge)
+        private ChallengeValue GetAIChallenge(PredictionEngine<MLModel, MLPrediction> challangePredictionEngine, ChallengeValue player)
         {
-            var predictions = new List<(float Score, ChallengeValue Challenge, MLModel Model)>();
-            foreach (var ai in challenges)
-            {
-                var model = new MLModel
+            var orderedPredictions = gameValue.Challenges
+                .Select(ai =>
                 {
-                    GameName = gameValue.Name,
-                    Player = expectedChallenge.Attack.Value,
-                    AI = ai.Attack.Value
-                };
+                    var model = MLModel.From(gameValue.Name, player, ai);
+                    var prediction = challangePredictionEngine.Predict(model);
+                    model.Score = prediction.Score;
 
-                var prediction = winPredictionEngine.Predict(model);
-                model.Score = prediction.Score;
-                predictions.Add((prediction.Score, ai, model));
-            }
+                    return model;
+                })
+                .OrderByDescending(prediction => prediction.Score);
 
-            var orderedPredictions = predictions.OrderByDescending(item => item.Score);
-            var aiPrediction = orderedPredictions.FirstOrDefault();
+            var aiPrediction = orderedPredictions.FirstOrDefault(prediction => (ChallengeResult)prediction.ChallangeResult == ChallengeResult.Lost);
 
-            predictionRepository.AddAIPrediction(aiPrediction.Model);
-            return aiPrediction.Challenge;
+            predictionRepository.AddAIPrediction(aiPrediction);
+
+            var challange = gameValue.Challenges.First(challange => challange.Attack.Value == aiPrediction.AI);
+            return challange;
         }
 
         private ChallengeValue GetPlayerChallenge(PredictionEngine<MLModel, MLPrediction> playerPredictionEngine)
         {
-            var predictions = new List<(float Score, ChallengeValue Challenge, MLModel Model)>();
-            foreach (var player in challenges)
-            {
-                foreach (var ai in challenges)
-                {
-                    var model = new MLModel
+            //var aiChallange = gameValue.Challenges.SingleOrDefault(challange => challange.Attack.Value == ai);
+
+            var orderedPredictions = gameValue.Challenges
+                .SelectMany(player => gameValue.Challenges
+                    .Select(ai =>
                     {
-                        GameName = gameValue.Name,
-                        Player = player.Attack.Value,
-                        AI = ai.Attack.Value
-                    };
+                        var model = MLModel.From(gameValue.Name, player, ai);
+                        var prediction = playerPredictionEngine.Predict(model);
+                        model.Score = prediction.Score;
 
-                    var prediction = playerPredictionEngine.Predict(model);
-                    model.Score = prediction.Score;
+                        return model;
+                    }))
+                .OrderByDescending(prediction => prediction.Score);
 
-                    predictions.Add((prediction.Score, player, model));
-                }
-            }
+            var playerPrediction = orderedPredictions.FirstOrDefault(prediction => (ChallengeResult)prediction.ChallangeResult == ChallengeResult.Won);
 
-            var orderedPredictions = predictions.OrderByDescending(item => item.Score);
-            var playerPrediction = orderedPredictions.FirstOrDefault();
+            predictionRepository.AddPlayerPrediction(playerPrediction);
 
-            predictionRepository.AddPlayerPrediction(playerPrediction.Model);
-            return playerPrediction.Challenge;
+            var challange = gameValue.Challenges.First(challange => challange.Attack.Value == playerPrediction.Player);
+            return challange;
         }
     }
 }
