@@ -8,7 +8,6 @@ namespace rpsls.Infrastructure.Algorithms.Contexts
 {
     public class MLAlgorithmContext : AlgorithmContext
     {
-        public uint? LastAIChallange { get; private set; }
         public IList<MLModel> MLModels { get; private set; }
 
         public override void SaveGameRound(GameRound gameRound)
@@ -16,8 +15,6 @@ namespace rpsls.Infrastructure.Algorithms.Contexts
             base.SaveGameRound(gameRound);
 
             MLModels.Add(MLModel.From(gameRound.GameName, gameRound));
-
-            LastAIChallange = MLModels.Last().AI;
         }
 
         internal override void LoadPreviousMatches(GameValue gameValue, IList<GameRound> gameRounds)

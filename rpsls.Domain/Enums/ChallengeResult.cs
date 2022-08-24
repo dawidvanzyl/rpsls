@@ -2,8 +2,8 @@
 {
     public enum ChallengeResult
     {
-        Lost = 0,
-        Tied = 1,
-        Won = 2
+        Lost = -1,
+        Tied = 0,
+        Won = 1
     }
 }

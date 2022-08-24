@@ -20,11 +20,13 @@ namespace rpsls.Infrastructure.Algorithms.Contexts
         internal virtual void LoadPreviousMatches(GameValue gameValue, IList<GameRound> gameRounds)
         {
             GameValue = gameValue;
-            GameRounds = gameRounds;
 
-            (GameRounds as List<GameRound>).AddRange(gameValue.Challenges
+            GameRounds = gameValue.Challenges
                 .SelectMany(player => gameValue.Challenges
-                .Select(ai => GameRound.From(gameValue, player, ai, (ChallengeResult)player.CompareTo(ai)))));
+                .Select(machine => GameRound.From(gameValue, player, machine, (ChallengeResult)player.CompareTo(machine))))
+                .ToList();
+
+            (GameRounds as List<GameRound>).AddRange(gameRounds);
         }
     }
 }

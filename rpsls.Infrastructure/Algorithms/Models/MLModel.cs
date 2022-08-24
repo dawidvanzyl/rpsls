@@ -7,11 +7,12 @@ namespace rpsls.Infrastructure.Algorithms.Models
     public class MLModel
     {
         [KeyType(count: 262111)]
-        public uint AI { get; set; }
-
-        public int ChallangeResult { get; set; }
+        public uint ChallangeResult { get; set; }
 
         public string GameName { get; set; }
+
+        [KeyType(count: 262111)]
+        public uint Machine { get; set; }
 
         [KeyType(count: 262111)]
         public uint Player { get; set; }
@@ -20,12 +21,12 @@ namespace rpsls.Infrastructure.Algorithms.Models
 
         public static MLModel From(string gameName, GameRound gameRound)
         {
-            return new MLModel { GameName = gameName, Player = gameRound.PlayerOne.AttackValue, AI = gameRound.PlayerTwo.AttackValue, ChallangeResult = (int)gameRound.PlayerOne.ChallengeResult };
+            return new MLModel { GameName = gameName, Player = gameRound.PlayerOne.AttackValue, Machine = gameRound.PlayerTwo.AttackValue, ChallangeResult = (uint)gameRound.PlayerOne.ChallengeResult + 1 };
         }
 
-        public static MLModel From(string gameName, ChallengeValue player, ChallengeValue ai)
+        public static MLModel From(string gameName, ChallengeValue player, ChallengeValue machine)
         {
-            return new MLModel { GameName = gameName, Player = player.Attack.Value, AI = ai.Attack.Value, ChallangeResult = player.CompareTo(ai) };
+            return new MLModel { GameName = gameName, Player = player.Attack.Value, Machine = machine.Attack.Value, ChallangeResult = (uint)player.CompareTo(machine) + 1 };
         }
     }
 }

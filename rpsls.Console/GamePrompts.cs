@@ -1,5 +1,5 @@
 ﻿using rpsls.Application;
-using rpsls.Domain.Enums;
+using rpsls.Application.Models;
 using rpsls.Domain.Values;
 using rpsls.Infrastructure.Repositories;
 using Sharprompt;
@@ -21,25 +21,39 @@ namespace rpsls.Console
 
         public void Play()
         {
-            var twoPlayerGame = !Prompt.Confirm("Do you want to play against the computer?");
-            var player1Name = Prompt.Input<string>("Player 1 what's your name?");
-            var player2Name = twoPlayerGame
-                ? Prompt.Input<string>("Player 2 what's your name?")
-                : "Computer";
-
-            var gameValue = Prompt.Select($"{player1Name} please select the game you want to play", gameValues);
+            var gameValue = Prompt.Select("Please select the game you want to play", gameValues);
             var rounds = Prompt.Input<byte>("How many rounds would you like to play (1-255)?");
             if (rounds == 0)
             {
-                System.Console.WriteLine($"Sorry {player1Name} we cannot do zero rounds, I'll upgrade you to 1 round.");
+                System.Console.WriteLine($"Sorry we cannot do zero rounds, I'll upgrade you to 1 round.");
                 rounds = 1;
             }
+
+            var noPlayerGame = Prompt.Confirm("Do you want to the computer to itself?");
+            var twoPlayerGame = false;
+            if (!noPlayerGame)
+            {
+                twoPlayerGame = !Prompt.Confirm("Do you want to play against the computer?");
+            }
+
+            var playerOne = new PlayerInput();
+            var playerTwo = new PlayerInput();
+
+            playerOne.Name = !noPlayerGame
+                ? Prompt.Input<string>("Player 1 what's your name?")
+                : "Random-1";
+
+            playerTwo.Name = twoPlayerGame
+                ? Prompt.Input<string>("Player 2 what's your name?")
+                : "ML-2";
 
             System.Console.WriteLine("");
             System.Console.WriteLine($"{gameValue}");
             System.Console.WriteLine("");
 
             var gameService = gameServiceFactory.Create(gameValue);
+            gameService.StartMatch(rounds, playerOne, playerTwo);
+
             for (byte i = 0; i < rounds; i++)
             {
                 System.Console.WriteLine($"Round {i + 1}");
@@ -49,46 +63,45 @@ namespace rpsls.Console
                     Prompt.ColorSchema.Answer = ConsoleColor.Black;
                 }
 
-                var player1 = Prompt.Select($"{player1Name} please select you attack", gameValue.Challenges);
-
-                ChallengeValue player2;
-                if (twoPlayerGame)
+                if (!noPlayerGame)
                 {
-                    player2 = Prompt.Select($"{player2Name} please select you attack", gameValue.Challenges);
+                    playerOne.Challenge = Prompt.Select($"{playerOne.Name} please select you attack", gameValue.Challenges);
                 }
                 else
                 {
-                    System.Console.WriteLine("Computer is deciding on an attack...");
-                    System.Console.WriteLine("");
-                    player2 = gameService.GetChallenge();
+                    System.Console.WriteLine($"{playerOne.Name} is deciding on an attack...");
+                    playerOne.Challenge = gameService.GetRandomChallenge();
                 }
 
-                System.Console.WriteLine("");
-                System.Console.WriteLine($"{player1Name} attacked with {player1}");
-                System.Console.WriteLine($"{player2Name} attacked with {player2}");
-                System.Console.WriteLine("");
-
-                var challengeResult = (ChallengeResult)player1.CompareTo(player2);
-                gameService.SaveMatchResult(player1, player2, challengeResult);
-                switch (challengeResult)
+                if (twoPlayerGame)
                 {
-                    case ChallengeResult.Won:
-                        System.Console.WriteLine(player2.GetDefeatMessage(player1.Attack));
-                        System.Console.WriteLine($"{player1Name} {ChallengeResult.Won.ToString().ToUpper()}");
-                        break;
-
-                    case ChallengeResult.Tied:
-                        System.Console.WriteLine($"Match {ChallengeResult.Tied.ToString().ToUpper()}");
-                        break;
-
-                    case ChallengeResult.Lost:
-                        System.Console.WriteLine(player1.GetDefeatMessage(player2.Attack));
-                        System.Console.WriteLine($"{player2Name} {ChallengeResult.Won.ToString().ToUpper()}");
-                        break;
+                    playerTwo.Challenge = Prompt.Select($"{playerTwo.Name} please select you attack", gameValue.Challenges);
+                }
+                else
+                {
+                    System.Console.WriteLine($"{playerTwo.Name} is deciding on an attack...");
+                    playerTwo.Challenge = gameService.GetMLChallenge();
                 }
 
                 System.Console.WriteLine("");
+                System.Console.WriteLine($"{playerOne.Name} attacked with {playerOne.Challenge}");
+                System.Console.WriteLine($"{playerTwo.Name} attacked with {playerTwo.Challenge}");
+                System.Console.WriteLine("");
+
+                var roundResult = gameService.GetRoundResult(playerOne, playerTwo);
+                if (!string.IsNullOrEmpty(roundResult.DefeatMessage))
+                {
+                    System.Console.WriteLine(roundResult.DefeatMessage);
+                }
+
+                System.Console.WriteLine(roundResult.ChallengeMessage);
+                System.Console.WriteLine("");
+
+                gameService.SaveRoundResult(roundResult);
             }
+
+            var matchResult = gameService.EndMatch();
+            System.Console.WriteLine(matchResult.GetMatchMessage());
         }
     }
 }
