@@ -15,13 +15,20 @@ namespace rpsls.Infrastructure.Algorithms
         public override ChallengeValue GetChallenge(AlgorithmContext context)
         {
             var winRounds = context.GameRounds
-                 .Where(gameRound => gameRound.PlayerTwo.ChallengeResult == ChallengeResult.Won);
+                 .Where(gameRound => gameRound.PlayerTwo.ChallengeResult == ChallengeResult.Won)
+                 .Take(gameValue.Challenges.Count);
 
-            var randomizer = new Random();
-            var nextChallenge = randomizer.Next(1, winRounds.Count() - 1);
-            var winRound = winRounds.ElementAt(nextChallenge);
+            ChallengeValue challange = null;
+            while (challange == null)
+            {
+                var randomizer = new Random();
+                var nextChallenge = randomizer.Next(1, winRounds.Count());
+                var winRound = winRounds.ElementAt(nextChallenge - 1);
 
-            return gameValue.Challenges.First(challenge => challenge.Attack.Value == winRound.PlayerTwo.AttackValue);
+                challange = gameValue.Challenges.FirstOrDefault(challenge => challenge.Attack.Value == winRound.PlayerTwo.AttackValue);
+            }
+
+            return challange;
         }
     }
 }

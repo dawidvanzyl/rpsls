@@ -4,6 +4,7 @@ using Microsoft.ML.Trainers;
 using rpsls.Domain.Values;
 using rpsls.Infrastructure.Algorithms.Contexts;
 using rpsls.Infrastructure.Algorithms.Models;
+using System;
 using System.Linq;
 
 namespace rpsls.Infrastructure.Algorithms
@@ -14,7 +15,6 @@ namespace rpsls.Infrastructure.Algorithms
         private readonly RandomChallengeAlgorithm randomChallengeAlgorithm;
         private MatrixFactorizationTrainer challengeTrainer;
         private MatrixFactorizationTrainer playerTrainer;
-        private int playerTrainingApproximationRank;
 
         public MLChallengeAlgorithm(RandomChallengeAlgorithm randomChallengeAlgorithm)
         {
@@ -67,15 +67,20 @@ namespace rpsls.Infrastructure.Algorithms
         private PredictionEngine<MLModel, MLPrediction> CreateChallengePredictionEngine(MLAlgorithmContext context)
         {
             var playerLoses = context.MLModels.Where(model => model.ChallangeResult == 0);
+            var data = playerLoses
+                .Union(context.MLModels
+                    .Where(model => model.ChallangeResult == 2)
+                    .Select(model => model.ReverseChallanges(-2)));
 
-            var dataView = mlContext.Data.LoadFromEnumerable(playerLoses, SchemaDefinition.Create(typeof(MLModel)));
+            var dataView = mlContext.Data.LoadFromEnumerable(data, SchemaDefinition.Create(typeof(MLModel)));
             ITransformer transformer = challengeTrainer.Fit(dataView);
             return mlContext.Model.CreatePredictionEngine<MLModel, MLPrediction>(transformer);
         }
 
         private PredictionEngine<MLModel, MLPrediction> CreatePlayerPredictionEngine(MLAlgorithmContext context)
         {
-            var data = context.MLModels.TakeLast(playerTrainingApproximationRank);
+            var data = context.MLModels.TakeLast((int)Math.Pow(gameValue.Challenges.Count, 2));
+
             var dataView = mlContext.Data.LoadFromEnumerable(data, SchemaDefinition.Create(typeof(MLModel)));
             ITransformer transformer = playerTrainer.Fit(dataView);
             return mlContext.Model.CreatePredictionEngine<MLModel, MLPrediction>(transformer);
@@ -83,15 +88,14 @@ namespace rpsls.Infrastructure.Algorithms
 
         private void CreatePlayerTrainer()
         {
-            playerTrainingApproximationRank = (gameValue.Challenges.Count() * gameValue.Challenges.Count()) + 1;
             var playerTrainerOptions = new MatrixFactorizationTrainer.Options
             {
                 MatrixColumnIndexColumnName = nameof(MLModel.Player),
                 MatrixRowIndexColumnName = nameof(MLModel.Machine),
                 LabelColumnName = nameof(MLModel.Score),
                 LossFunction = MatrixFactorizationTrainer.LossFunctionType.SquareLossOneClass,
-                ApproximationRank = playerTrainingApproximationRank,
-                LearningRate = playerTrainingApproximationRank * 2,
+                ApproximationRank = gameValue.Challenges.Count,
+                LearningRate = 1,
                 Alpha = 0.01,
                 Lambda = 0.025,
                 Quiet = true

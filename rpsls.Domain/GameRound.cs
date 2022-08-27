@@ -10,6 +10,8 @@ namespace rpsls.Domain
 
         public Guid Id { get; set; }
 
+        public DateTime Played { get; set; }
+
         public Challenge PlayerOne { get; set; }
 
         public Challenge PlayerTwo { get; set; }
@@ -33,7 +35,8 @@ namespace rpsls.Domain
                     Id = $"{playerTwo.Attack.Value}-{playerTwoResult}",
                     AttackValue = playerTwo.Attack.Value,
                     ChallengeResult = playerTwoResult
-                }
+                },
+                Played = DateTime.Now
             };
         }
 

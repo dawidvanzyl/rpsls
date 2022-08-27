@@ -28,5 +28,17 @@ namespace rpsls.Infrastructure.Algorithms.Models
         {
             return new MLModel { GameName = gameName, Player = player.Attack.Value, Machine = machine.Attack.Value, ChallangeResult = (uint)player.CompareTo(machine) + 1 };
         }
+
+        public MLModel ReverseChallanges(int challangeAdjust)
+        {
+            return new MLModel
+            {
+                ChallangeResult = (uint)((int)ChallangeResult + challangeAdjust),
+                GameName = GameName,
+                Machine = Player,
+                Player = Machine,
+                Score = Score
+            };
+        }
     }
 }

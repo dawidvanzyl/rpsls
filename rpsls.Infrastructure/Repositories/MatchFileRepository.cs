@@ -23,7 +23,7 @@ namespace rpsls.Infrastructure.Repositories
             connectionString = configuration.GetSection("ConnectionStrings:MatchDb").Value;
         }
 
-        public void Add(GameRound matchResult)
+        public void Add(GameRound gameRound)
         {
             using (var db = new LiteDatabase(connectionString))
             {
@@ -31,7 +31,7 @@ namespace rpsls.Infrastructure.Repositories
 
                 collection.EnsureIndex(result => result.Id, unique: true);
 
-                collection.Insert(matchResult);
+                collection.Insert(gameRound);
             }
         }
 
@@ -43,7 +43,7 @@ namespace rpsls.Infrastructure.Repositories
 
                 return collection
                     .FindAll()
-                    .Where(gameRound => gameRound.GameName == gameName)
+                    .OrderBy(gameRound => gameRound.Played)
                     .ToList();
             }
         }
