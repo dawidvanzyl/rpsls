@@ -7,7 +7,7 @@ namespace rpsls.Infrastructure.Repositories
 {
     public interface IGameRepository
     {
-        Task CreateMatchResultAsync(AttackTypes p1, AttackTypes p2, MatchResultTypes matchResult);
+        Task CreateMatchResultAsync(AttackTypes p1, AttackTypes p2, ResultTypes matchResult);
     }
 
     public class GameRepository : AbstractRepository, IGameRepository
@@ -17,7 +17,7 @@ namespace rpsls.Infrastructure.Repositories
         {
         }
 
-        public async Task CreateMatchResultAsync(AttackTypes p1, AttackTypes p2, MatchResultTypes matchResult)
+        public async Task CreateMatchResultAsync(AttackTypes p1, AttackTypes p2, ResultTypes matchResult)
         {
             var param = new
             {

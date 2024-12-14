@@ -1,6 +1,6 @@
 ﻿namespace rpsls.Domain.Enums
 {
-    public enum MatchResultTypes
+    public enum ResultTypes
     {
         Draw = 0,
         Win = 1,

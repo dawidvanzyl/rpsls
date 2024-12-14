@@ -1,11 +1,14 @@
-﻿using rpsls.Domain.Enums;
+﻿using rpsls.Domain;
+using rpsls.Domain.Enums;
 using rpsls.Infrastructure.Repositories;
 
 namespace rpsls.Application
 {
     public interface IGameService
     {
-        Task<MatchResultTypes> GetMatchResultAsync(AttackTypes p1, AttackTypes p2);
+        Match CreateMatch(int bestOf);
+
+        Task SaveRoundResultAsync(AttackTypes p1, AttackTypes p2, ResultTypes result);
     }
 
     public class GameService : IGameService
@@ -17,20 +20,15 @@ namespace rpsls.Application
             _gameRepository = gameRepository;
         }
 
-        public async Task<MatchResultTypes> GetMatchResultAsync(AttackTypes p1, AttackTypes p2)
+        public Match CreateMatch(int bestOf)
         {
-            var matchResult = (p1, p2) switch
-            {
-                _ when p1 == p2 => MatchResultTypes.Draw,
-                (AttackTypes.Rock, AttackTypes.Scissor)
-                or (AttackTypes.Paper, AttackTypes.Rock)
-                or (AttackTypes.Scissor, AttackTypes.Paper) => MatchResultTypes.Win,
-                _ => MatchResultTypes.Loss
-            };
+            var winningScore = (int)Math.Round(bestOf * 0.66m);
+            return new Match(winningScore);
+        }
 
-            await _gameRepository.CreateMatchResultAsync(p1, p2, matchResult);
-
-            return matchResult;
+        public async Task SaveRoundResultAsync(AttackTypes p1, AttackTypes p2, ResultTypes result)
+        {
+            await _gameRepository.CreateMatchResultAsync(p1, p2, result);
         }
     }
 }

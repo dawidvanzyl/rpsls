@@ -16,18 +16,31 @@ public static class Program
 
         var gameService = serviceProvider.GetRequiredService<IGameService>();
 
-        var player1 = Prompt.Input<string>("Player 1 name");
-        var player2 = "Computer 1";
+        var p1 = Prompt.Input<string>("Player 1 name");
+        var p2 = "Computer";
+        var bestOf = Prompt.Input<int>("Best out of");
+        var match = gameService.CreateMatch(bestOf);
 
-        var player1Attack = Prompt.Select<AttackTypes>($"{player1} attack");
-        var player2Attack = (AttackTypes)Random.Shared.Next(1, 3);
+        while (!match.IsOver())
+        {
+            var p1Attack = Prompt.Select<AttackTypes>($"{p1} attack");
+            var p2Attack = (AttackTypes)Random.Shared.Next(1, 3);
 
-        System.Console.WriteLine($"{player2} attack: {player2Attack}");
+            System.Console.WriteLine($"{p2} attack: {p2Attack}");
 
-        var result = gameService
-            .GetMatchResultAsync(player1Attack, player2Attack)
-            .GetAwaiter()
-            .GetResult();
-        System.Console.WriteLine(result);
+            var result = match.GetResult(p1Attack, p2Attack);
+
+            gameService
+                .SaveRoundResultAsync(p1Attack, p2Attack, result)
+                .GetAwaiter()
+                .GetResult();
+
+            System.Console.WriteLine(result);
+            System.Console.WriteLine();
+        }
+
+        var matchScores = match.GetScores();
+        System.Console.WriteLine("Game over");
+        System.Console.WriteLine($"{p1} - {matchScores[0]} : {p2} - {matchScores[1]}");
     }
 }
