@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\rpsls.Infrastructure\rpsls.Infrastructure.csproj" />
-  </ItemGroup>
-
 </Project>

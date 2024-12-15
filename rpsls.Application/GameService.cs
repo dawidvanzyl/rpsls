@@ -1,6 +1,6 @@
 ﻿using rpsls.Domain;
-using rpsls.Domain.Enums;
-using rpsls.Infrastructure.Repositories;
+using rpsls.Domain.Algorithms;
+using rpsls.Domain.Modules;
 
 namespace rpsls.Application
 {
@@ -8,16 +8,20 @@ namespace rpsls.Application
     {
         Match CreateMatch(int bestOf);
 
-        Task SaveRoundResultAsync(AttackTypes p1, AttackTypes p2, ResultTypes result);
+        IAlgorithm GetAlgorithm();
+
+        Task SaveMatchResultsAsync();
     }
 
     public class GameService : IGameService
     {
-        private readonly IGameRepository _gameRepository;
+        private readonly IAlgorithm _algorithm;
+        private readonly IGameModule _gameModule;
 
-        public GameService(IGameRepository gameRepository)
+        public GameService(IGameModule gameModule, IAlgorithm algorithm)
         {
-            _gameRepository = gameRepository;
+            _gameModule = gameModule;
+            _algorithm = algorithm;
         }
 
         public Match CreateMatch(int bestOf)
@@ -26,9 +30,14 @@ namespace rpsls.Application
             return new Match(winningScore);
         }
 
-        public async Task SaveRoundResultAsync(AttackTypes p1, AttackTypes p2, ResultTypes result)
+        public IAlgorithm GetAlgorithm()
         {
-            await _gameRepository.CreateMatchResultAsync(p1, p2, result);
+            return _algorithm;
+        }
+
+        public async Task SaveMatchResultsAsync()
+        {
+            await _gameModule.SaveMatchResultsAsync();
         }
     }
 }

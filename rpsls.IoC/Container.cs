@@ -18,6 +18,7 @@ public static class Container
 
         return services
             .Application()
+            .Domain()
             .Infrastructure();
     }
 }

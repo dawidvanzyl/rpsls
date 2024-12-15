@@ -1,4 +1,4 @@
-﻿using rpsls.Domain.Enums;
+﻿using rpsls.Entities.Enums;
 
 namespace rpsls.Domain
 {

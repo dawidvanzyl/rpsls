@@ -1,13 +1,16 @@
-﻿using Microsoft.Extensions.Configuration;
-using rpsls.Domain.Enums;
+﻿using Dapper;
+using Microsoft.Extensions.Configuration;
+using rpsls.Entities;
+using rpsls.Infrastructure.Dtos;
 using rpsls.Infrastructure.Repositories.Abstracts;
-using rpsls.Infrastructure.ValueMaps;
 
 namespace rpsls.Infrastructure.Repositories
 {
     public interface IGameRepository
     {
-        Task CreateMatchResultAsync(AttackTypes p1, AttackTypes p2, ResultTypes matchResult);
+        Task CreateMatchResultsAsync(IEnumerable<MatchResult> matchResults);
+
+        Task<IList<MatchResult>> GetMatchResultsAsync();
     }
 
     public class GameRepository : AbstractRepository, IGameRepository
@@ -17,16 +20,31 @@ namespace rpsls.Infrastructure.Repositories
         {
         }
 
-        public async Task CreateMatchResultAsync(AttackTypes p1, AttackTypes p2, ResultTypes matchResult)
+        public async Task CreateMatchResultsAsync(IEnumerable<MatchResult> matchResults)
         {
+            var tvpMatchResult = DataTableFactory
+                .CreateMatchResultsTable(matchResults)
+                .AsTableValuedParameter("dbo.tvp_MatchResult");
+
             var param = new
             {
-                Player1 = p1,
-                Player2 = p2,
-                Result = matchResult
+                MatchResults = tvpMatchResult
             };
 
-            await ExecuteAsync(StoredProcedures.CreateMatchResult, param);
+            await ExecuteAsync("dbo.CreateMatchResults", param);
+        }
+
+        public async Task<IList<MatchResult>> GetMatchResultsAsync()
+        {
+            var resuls = await QueryAsync<MatchResultDto>("dbo.GetMatchResults");
+            return resuls
+                .Select(dto => new MatchResult
+                {
+                    Player1 = dto.Player1,
+                    Player2 = dto.Player2,
+                    Result = dto.Result
+                })
+                .ToList();
         }
     }
 }

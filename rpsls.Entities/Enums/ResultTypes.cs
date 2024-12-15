@@ -1,4 +1,4 @@
-﻿namespace rpsls.Domain.Enums
+﻿namespace rpsls.Entities.Enums
 {
     public enum ResultTypes
     {
