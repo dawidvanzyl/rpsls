@@ -8,7 +8,9 @@ namespace rpsls.Domain.Modules
     {
         void AddMatchResult(AttackTypes p1, AttackTypes p2, ResultTypes result);
 
-        IList<MatchResult> GetMatchResults();
+        IEnumerable<MatchResult> GetAll();
+
+        IEnumerable<AttackTypes> GetPlayer1Attacks();
 
         Task SaveMatchResultsAsync();
 
@@ -30,9 +32,16 @@ namespace rpsls.Domain.Modules
             _matchResults.Value.Add(MatchResult.Create(p1, p2, result));
         }
 
-        public IList<MatchResult> GetMatchResults()
+        public IEnumerable<MatchResult> GetAll()
         {
             return _matchResults.Value;
+        }
+
+        public IEnumerable<AttackTypes> GetPlayer1Attacks()
+        {
+            return _matchResults
+                .Value
+                .Select(matchResult => matchResult.Player1);
         }
 
         public async Task SaveMatchResultsAsync()

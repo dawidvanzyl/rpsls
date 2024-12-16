@@ -5,5 +5,7 @@ namespace rpsls.Domain.Algorithms
     public interface IAlgorithm
     {
         AttackTypes CalculateAttack();
+
+        void SetupRuleSet();
     }
 }

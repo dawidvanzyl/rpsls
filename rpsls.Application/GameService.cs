@@ -32,6 +32,7 @@ namespace rpsls.Application
 
         public IAlgorithm GetAlgorithm()
         {
+            _algorithm.SetupRuleSet();
             return _algorithm;
         }
 
