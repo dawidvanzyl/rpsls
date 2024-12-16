@@ -38,12 +38,12 @@ namespace rpsls.Infrastructure.Repositories
         {
             var resuls = await QueryAsync<MatchResultDto>("dbo.GetMatchResults");
             return resuls
-                .Select(dto => new MatchResult
-                {
-                    Player1 = dto.Player1,
-                    Player2 = dto.Player2,
-                    Result = dto.Result
-                })
+                .Select(dto => new MatchResult(
+                    dto.AttackCount,
+                    false,
+                    dto.Player1,
+                    dto.Player2,
+                    dto.Result))
                 .ToList();
         }
     }

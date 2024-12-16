@@ -17,18 +17,40 @@ namespace rpsls.Domain.Algorithms
 
         public AttackTypes CalculateAttack()
         {
-            var playerAttacks = _gameModule.GetPlayer1Attacks();
+            var playerAttacks = _gameModule.GetAll();
+
+            if (!playerAttacks.Any())
+            {
+                return (AttackTypes)Random.Shared.Next(1, 3);
+            }
 
             var attackPercentages = playerAttacks
-                .GroupBy((attackType) => attackType)
-                .Select(attackGroup => new { AttackType = attackGroup.Key, Percentage = Math.Round(100.0m * attackGroup.Count() / playerAttacks.Count(), 2) })
+                .GroupBy((matchResult) => matchResult.Player1)
+                .Select(attackGroup =>
+                {
+                    var keyAttackCount = playerAttacks
+                        .Where(pa => pa.Player1 == attackGroup.Key)
+                        .Sum(pa => pa.AttackCount);
+
+                    var modifier = Math.Round(1m * attackGroup.Count() / keyAttackCount, 2);
+                    if (playerAttacks.LastOrDefault()?.Player1 == attackGroup.Key)
+                    {
+                        modifier += 0.2m;
+                    }
+
+                    var percentage = 100.0m * attackGroup.Count() / playerAttacks.Count();
+                    var modifiedPercentage = Math.Round(percentage * modifier, 2);
+
+                    return new { attackGroup.Key, Percentage = modifiedPercentage };
+                })
                 .OrderByDescending(a => a.Percentage);
 
-            var player1Prediction = attackPercentages.First().AttackType;
+            var player1Prediction = attackPercentages.First().Key;
 
-            return _ruleSet
-                .First(rs => rs.Beats == player1Prediction)
-                .Attack;
+            var winningRule = _ruleSet.FirstOrDefault(rs => rs.Beats == player1Prediction);
+            return winningRule == null
+                ? (AttackTypes)Random.Shared.Next(1, 3)
+                : winningRule.Attack;
         }
 
         public void SetupRuleSet()

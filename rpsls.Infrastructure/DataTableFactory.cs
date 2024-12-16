@@ -11,10 +11,15 @@ namespace rpsls.Infrastructure
             tvpMatchResult.Columns.Add("Player1", typeof(int));
             tvpMatchResult.Columns.Add("Player2", typeof(int));
             tvpMatchResult.Columns.Add("Result", typeof(int));
+            tvpMatchResult.Columns.Add("AttackCount", typeof(int));
 
             foreach (var matchResult in matchResults)
             {
-                tvpMatchResult.Rows.Add(matchResult.Player1, matchResult.Player2, matchResult.Result);
+                tvpMatchResult.Rows.Add(
+                    matchResult.Player1,
+                    matchResult.Player2,
+                    matchResult.Result,
+                    matchResult.AttackCount);
             }
 
             return tvpMatchResult;
