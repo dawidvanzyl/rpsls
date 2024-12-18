@@ -16,10 +16,10 @@ namespace rpsls.Infrastructure
             foreach (var matchResult in matchResults)
             {
                 tvpMatchResult.Rows.Add(
-                    matchResult.Player1,
-                    matchResult.Player2,
+                    matchResult.P1Attack,
+                    matchResult.P2Attack,
                     matchResult.Result,
-                    matchResult.AttackCount);
+                    matchResult.ConsecutiveRepeats);
             }
 
             return tvpMatchResult;

@@ -8,7 +8,7 @@ namespace rpsls.Domain.Modules
     {
         void AddMatchResult(AttackTypes p1, AttackTypes p2, ResultTypes result);
 
-        IEnumerable<MatchResult> GetAll();
+        IEnumerable<MatchResult> GetFullHistory();
 
         Task SaveMatchResultsAsync();
 
@@ -28,9 +28,9 @@ namespace rpsls.Domain.Modules
         public void AddMatchResult(AttackTypes p1, AttackTypes p2, ResultTypes result)
         {
             var lastMatchResult = _matchResults.Value.LastOrDefault();
-            var attackCount = lastMatchResult == null || lastMatchResult.Player1 != p1
+            var attackCount = lastMatchResult == null || lastMatchResult.P1Attack != p1
                 ? 1
-                : lastMatchResult.AttackCount + 1;
+                : lastMatchResult.ConsecutiveRepeats + 1;
 
             _matchResults.Value.Add(new MatchResult(
                 attackCount,
@@ -40,7 +40,7 @@ namespace rpsls.Domain.Modules
                 result));
         }
 
-        public IEnumerable<MatchResult> GetAll()
+        public IEnumerable<MatchResult> GetFullHistory()
         {
             return _matchResults.Value;
         }

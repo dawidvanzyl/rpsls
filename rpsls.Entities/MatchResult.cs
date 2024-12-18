@@ -3,9 +3,9 @@
 namespace rpsls.Entities
 {
     public record MatchResult(
-        int AttackCount,
+        int ConsecutiveRepeats,
         bool IsNew,
-        AttackTypes Player1,
-        AttackTypes Player2,
+        AttackTypes P1Attack,
+        AttackTypes P2Attack,
         ResultTypes Result);
 }

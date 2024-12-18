@@ -17,7 +17,7 @@ public static class ServiceCollectionExtension
 
     public static IServiceCollection Domain(this IServiceCollection services)
     {
-        services.AddSingleton<IAlgorithm, CustomAlgorithm>();
+        services.AddSingleton<IAlgorithm, FullHistoryAlgorithm>();
 
         services.AddSingleton<IGameModule, GameModule>();
 

@@ -1,49 +1,44 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using rpsls.Application;
-using rpsls.Domain.Modules;
-using rpsls.Entities.Enums;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using rpsls.IoC;
-using Sharprompt;
 
 namespace rpsls.Console;
 
 public static class Program
 {
-    private static async Task Main()
-    {
-        var serviceProvider = Container
-            .Create()
-            .BuildServiceProvider();
-
-        var gameService = serviceProvider.GetRequiredService<IGameService>();
-        var gameModule = serviceProvider.GetRequiredService<IGameModule>();
-
-        var p1 = Prompt.Input<string>("Player 1 name");
-        var p2 = "Computer";
-        var bestOf = Prompt.Input<int>("Best out of");
-
-        gameModule.Setup();
-        var match = gameService.CreateMatch(bestOf);
-        var algorithm = gameService.GetAlgorithm();
-
-        while (!match.IsOver())
+    private static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+        .ConfigureServices((_, services) =>
         {
-            var p1Attack = Prompt.Select<AttackTypes>($"{p1} attack");
-            var p2Attack = algorithm.CalculateAttack();
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
 
-            System.Console.WriteLine($"{p2} attack: {p2Attack}");
+            services
+                .Default()
+                .AddSingleton(configuration)
+                .AddTransient<HostedService>();
+        })
+        .ConfigureLogging((_, logging) =>
+        {
+            logging.ClearProviders();
+            logging.AddSimpleConsole(options => options.IncludeScopes = true);
+        });
 
-            var result = match.GetResult(p1Attack, p2Attack);
+    private static async Task Main(string[] args)
+    {
+        var host = CreateHostBuilder(args).Build();
+        var workerInstance = host.Services.GetRequiredService<HostedService>();
+        await workerInstance.Execute();
+        await host.RunAsync();
 
-            gameModule.AddMatchResult(p1Attack, p2Attack, result);
+        //var serviceProvider = Container
+        //    .Create()
+        //    .BuildServiceProvider();
 
-            System.Console.WriteLine(result);
-            System.Console.WriteLine();
-        }
-
-        await gameService.SaveMatchResultsAsync();
-        var matchScores = match.GetScores();
-        System.Console.WriteLine("Game over");
-        System.Console.WriteLine($"{p1} - {matchScores[0]} : {p2} - {matchScores[1]}");
+        //var gameService = serviceProvider.GetRequiredService<IGameService>();
+        //var gameModule = serviceProvider.GetRequiredService<IGameModule>();
     }
 }
