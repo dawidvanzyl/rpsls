@@ -5,12 +5,12 @@ using System.Collections.Immutable;
 
 namespace rpsls.Domain.Algorithms
 {
-    public class CustomAlgorithm : IAlgorithm
+    public class FullHistoryAlgorithm : IAlgorithm
     {
         private readonly IGameModule _gameModule;
         private ImmutableHashSet<RuleSet> _ruleSet;
 
-        public CustomAlgorithm(IGameModule gameModule)
+        public FullHistoryAlgorithm(IGameModule gameModule)
         {
             _gameModule = gameModule;
         }
