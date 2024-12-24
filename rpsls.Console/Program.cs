@@ -33,12 +33,5 @@ public static class Program
         var workerInstance = host.Services.GetRequiredService<HostedService>();
         await workerInstance.Execute();
         await host.RunAsync();
-
-        //var serviceProvider = Container
-        //    .Create()
-        //    .BuildServiceProvider();
-
-        //var gameService = serviceProvider.GetRequiredService<IGameService>();
-        //var gameModule = serviceProvider.GetRequiredService<IGameModule>();
     }
 }

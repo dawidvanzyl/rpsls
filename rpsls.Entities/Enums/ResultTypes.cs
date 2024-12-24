@@ -1,9 +1,8 @@
-﻿namespace rpsls.Entities.Enums
+﻿namespace rpsls.Entities.Enums;
+
+public enum ResultTypes
 {
-    public enum ResultTypes
-    {
-        Draw = 0,
-        Win = 1,
-        Loss = 2
-    }
+    Draw = 0,
+    Win = 1,
+    Loss = 2
 }

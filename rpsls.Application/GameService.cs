@@ -2,43 +2,32 @@
 using rpsls.Domain.Algorithms;
 using rpsls.Domain.Modules;
 
-namespace rpsls.Application
+namespace rpsls.Application;
+
+public interface IGameService
 {
-    public interface IGameService
+    Match CreateMatch(int bestOf);
+
+    IAlgorithm GetAlgorithm();
+
+    Task SaveMatchResultsAsync();
+}
+
+public class GameService(IMatchResultModule matchResultModule, IAlgorithm algorithm) : IGameService
+{
+    public Match CreateMatch(int bestOf)
     {
-        Match CreateMatch(int bestOf);
-
-        IAlgorithm GetAlgorithm();
-
-        Task SaveMatchResultsAsync();
+        var winningScore = (int)Math.Round(bestOf * 0.66m);
+        return new Match(winningScore);
     }
 
-    public class GameService : IGameService
+    public IAlgorithm GetAlgorithm()
     {
-        private readonly IAlgorithm _algorithm;
-        private readonly IGameModule _gameModule;
+        return algorithm;
+    }
 
-        public GameService(IGameModule gameModule, IAlgorithm algorithm)
-        {
-            _gameModule = gameModule;
-            _algorithm = algorithm;
-        }
-
-        public Match CreateMatch(int bestOf)
-        {
-            var winningScore = (int)Math.Round(bestOf * 0.66m);
-            return new Match(winningScore);
-        }
-
-        public IAlgorithm GetAlgorithm()
-        {
-            _algorithm.SetupRuleSet();
-            return _algorithm;
-        }
-
-        public async Task SaveMatchResultsAsync()
-        {
-            await _gameModule.SaveMatchResultsAsync();
-        }
+    public async Task SaveMatchResultsAsync()
+    {
+        await matchResultModule.SaveAsync();
     }
 }

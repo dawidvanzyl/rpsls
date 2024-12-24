@@ -17,16 +17,20 @@ public static class ServiceCollectionExtension
 
     public static IServiceCollection Domain(this IServiceCollection services)
     {
-        services.AddSingleton<IAlgorithm, FullHistoryAlgorithm>();
+        services.AddSingleton<IAlgorithm, AttackAlgorithm>();
 
-        services.AddSingleton<IGameModule, GameModule>();
+        services
+            .AddSingleton<IMatchResultModule, MatchResultModule>()
+            .AddSingleton<IRuleSetModule, RuleSetModule>();
 
         return services;
     }
 
     public static IServiceCollection Infrastructure(this IServiceCollection services)
     {
-        services.AddSingleton<IGameRepository, GameRepository>();
+        services
+            .AddSingleton<IMatchResultRepository, MatchResultRepository>()
+            .AddSingleton<IRuleSetRepository, RuleSetRepository>();
 
         return services;
     }

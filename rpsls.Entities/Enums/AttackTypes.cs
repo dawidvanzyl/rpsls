@@ -1,9 +1,8 @@
-﻿namespace rpsls.Entities.Enums
+﻿namespace rpsls.Entities.Enums;
+
+public enum AttackTypes
 {
-    public enum AttackTypes
-    {
-        Rock = 1,
-        Paper = 2,
-        Scissor = 3
-    }
+    Rock = 1,
+    Paper = 2,
+    Scissor = 3
 }

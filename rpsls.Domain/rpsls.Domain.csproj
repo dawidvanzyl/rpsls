@@ -10,4 +10,8 @@
     <ProjectReference Include="..\rpsls.Infrastructure\rpsls.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Algorithms\Models\" />
+  </ItemGroup>
+
 </Project>

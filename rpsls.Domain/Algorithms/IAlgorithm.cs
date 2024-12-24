@@ -1,11 +1,8 @@
 ﻿using rpsls.Entities.Enums;
 
-namespace rpsls.Domain.Algorithms
-{
-    public interface IAlgorithm
-    {
-        AttackTypes CalculateAttack();
+namespace rpsls.Domain.Algorithms;
 
-        void SetupRuleSet();
-    }
+public interface IAlgorithm
+{
+    AttackTypes CalculateAttack();
 }

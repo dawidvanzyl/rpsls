@@ -1,85 +1,73 @@
 ﻿using Microsoft.Extensions.Logging;
-using rpsls.Domain.Algorithms.Models;
 using rpsls.Domain.Modules;
 using rpsls.Entities.Enums;
-using System.Collections.Immutable;
 
-namespace rpsls.Domain.Algorithms
+namespace rpsls.Domain.Algorithms;
+
+public class AttackAlgorithm(
+    IMatchResultModule matchResultModule,
+    IRuleSetModule ruleSetModule,
+    ILogger<AttackAlgorithm> logger)
+    : IAlgorithm
 {
-    public class FullHistoryAlgorithm : IAlgorithm
+    public AttackTypes CalculateAttack()
     {
-        private readonly IGameModule _gameModule;
-        private readonly ILogger<FullHistoryAlgorithm> _logger;
-        private ImmutableHashSet<RuleSet> _ruleSet;
+        var matchResults = matchResultModule.GetAll();
 
-        public FullHistoryAlgorithm(IGameModule gameModule, ILogger<FullHistoryAlgorithm> logger)
+        if (!matchResults.Any())
         {
-            _gameModule = gameModule;
-            _logger = logger;
+            return (AttackTypes)Random.Shared.Next(1, 3);
         }
 
-        public AttackTypes CalculateAttack()
-        {
-            var fullHistory = _gameModule.GetFullHistory();
-
-            if (!fullHistory.Any())
+        var attackPercentages = matchResults
+            .GroupBy((matchResult) => matchResult.P1Attack)
+            .Select(attackGroup =>
             {
-                return (AttackTypes)Random.Shared.Next(1, 3);
-            }
+                var totalCount = matchResults.Count;
+                var count = attackGroup.Count();
 
-            var attackPercentages = fullHistory
-                .AsParallel()
-                .GroupBy((matchResult) => matchResult.P1Attack)
-                .Select(attackGroup =>
-                {
-                    var totalCount = fullHistory.Count();
-                    var consecutiveRepeatsSum = attackGroup.Sum(pa => pa.ConsecutiveRepeats);
-                    var count = attackGroup.Count();
+                var smoothedCount = CalculateSmoothedCount(attackGroup.Count());
+                var weighedPercentage = CalculateWeightedPercentage(smoothedCount, totalCount);
 
-                    var modifier = CalculateModifier(consecutiveRepeatsSum, count);
-                    var percentage = CalculatePercentage(totalCount, count);
-                    var modifiedPercentage = Math.Round(percentage * modifier, 2);
+                logger.LogDebug(
+                    "Attack: {Attack}, Count: {Count}, Smoothed Count: {SmoothedCount}, Weighted Percentage: {WeighedPercentage}",
+                    attackGroup.Key,
+                    count,
+                    smoothedCount,
+                    weighedPercentage);
 
-                    _logger.LogDebug($"Attack: {attackGroup.Key}, Count: {count}, Modifier: {modifier}, Percentage: {modifiedPercentage}");
+                return new { Attack = attackGroup.Key, WeighedPercentage = weighedPercentage };
+            })
+            .OrderByDescending(a => a.WeighedPercentage)
+            .ToList();
 
-                    return new { Attack = attackGroup.Key, Percentage = modifiedPercentage };
-                })
-                .OrderByDescending(a => a.Percentage)
-                .ToList();
+        var player1Prediction = attackPercentages[0].Attack;
 
-            var player1Prediction = attackPercentages[0].Attack;
+        return ruleSetModule.GetAttackToBeat(player1Prediction);
+    }
 
-            var winningRule = _ruleSet.FirstOrDefault(rs => rs.Beats == player1Prediction);
-            return winningRule == null
-                ? (AttackTypes)Random.Shared.Next(1, 3)
-                : winningRule.Attack;
-        }
+    private static decimal CalculateSmoothedCount(int attackGroupCount)
+    {
+        var smoothedCount = 1m;
+        var alpha = 0.1m; // Smoothing factor
 
-        public void SetupRuleSet()
+        // Apply exponential smoothing over the range of consecutive repeats
+        for (var consecutiveRepeats = 1; consecutiveRepeats <= attackGroupCount; consecutiveRepeats++)
         {
-            var matchResults = _gameModule.GetFullHistory();
-
-            _ruleSet = matchResults
-                .Where(matchResult => matchResult.Result != ResultTypes.Draw)
-                .Select(matchResult =>
-                {
-                    return matchResult.Result == ResultTypes.Win
-                        ? new { p1 = matchResult.P1Attack, p2 = matchResult.P2Attack }
-                        : new { p1 = matchResult.P2Attack, p2 = matchResult.P1Attack };
-                })
-                .Distinct()
-                .Select(a => new RuleSet { Attack = a.p1, Beats = a.p2 })
-                .ToImmutableHashSet();
+            smoothedCount = (alpha * consecutiveRepeats) + ((1 - alpha) * smoothedCount);
         }
 
-        private static decimal CalculateModifier(int consecutiveRepeatsSum, int count)
+        return smoothedCount;
+    }
+
+    private static decimal CalculateWeightedPercentage(decimal smoothedCount, decimal totalCount)
+    {
+        if (totalCount == 0)
         {
-            return consecutiveRepeatsSum == 0 ? 1m : Math.Round(1m * count / consecutiveRepeatsSum, 2);
+            return 0m; // Avoid division by zero
         }
 
-        private static decimal CalculatePercentage(int totalCount, int count)
-        {
-            return Math.Round(100.0m * count / totalCount, 2);
-        }
+        // Calculate the weighted percentage
+        return smoothedCount / totalCount;
     }
 }
