@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using rpsls.IoC;
+using Serilog;
 
 namespace rpsls.Console;
 
@@ -21,14 +21,12 @@ public static class Program
                 .AddSingleton(configuration)
                 .AddTransient<HostedService>();
         })
-        .ConfigureLogging((_, logging) =>
-        {
-            logging.ClearProviders();
-            logging.AddSimpleConsole(options => options.IncludeScopes = true);
-        });
+        .UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration));
 
     private static async Task Main(string[] args)
     {
+        Log.Logger = new LoggerConfiguration().CreateLogger();
+
         var host = CreateHostBuilder(args).Build();
         var workerInstance = host.Services.GetRequiredService<HostedService>();
         await workerInstance.Execute();

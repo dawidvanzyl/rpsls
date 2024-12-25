@@ -17,7 +17,7 @@ public static class ServiceCollectionExtension
 
     public static IServiceCollection Domain(this IServiceCollection services)
     {
-        services.AddSingleton<IAlgorithm, SmoothedCountAlgorithm>();
+        services.AddSingleton<IAlgorithm, AttackAlgorithm>();
 
         services
             .AddSingleton<IMatchResultModule, MatchResultModule>()

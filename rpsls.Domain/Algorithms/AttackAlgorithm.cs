@@ -4,10 +4,10 @@ using rpsls.Entities.Enums;
 
 namespace rpsls.Domain.Algorithms;
 
-public class SmoothedCountAlgorithm(
+public class AttackAlgorithm(
     IMatchResultModule matchResultModule,
     IRuleModule ruleSetModule,
-    ILogger<SmoothedCountAlgorithm> logger)
+    ILogger<AttackAlgorithm> logger)
     : IAlgorithm
 {
     public AttackTypes CalculateAttack()
@@ -19,22 +19,40 @@ public class SmoothedCountAlgorithm(
             return (AttackTypes)Random.Shared.Next(1, 3);
         }
 
+        var totalCount = matchResults.Count;
+        var lastMatchResult = matchResults[matchResults.Count - 1];
+
         var attackPercentages = matchResults
             .GroupBy((matchResult) => matchResult.P1Attack)
             .Select(attackGroup =>
             {
-                var totalCount = matchResults.Count;
                 var count = attackGroup.Count();
 
                 var smoothedCount = CalculateSmoothedCount(attackGroup.Count());
                 var weighedPercentage = CalculateWeightedPercentage(smoothedCount, totalCount);
 
-                logger.LogDebug(
-                    "Attack: {Attack}, Count: {Count}, Smoothed Count: {SmoothedCount}, Weighted Percentage: {WeighedPercentage}",
-                    attackGroup.Key,
-                    count,
-                    smoothedCount,
-                    weighedPercentage);
+                logger.LogDebug("");
+                logger.LogDebug("Attack Group: {AttackGroup}", attackGroup.Key);
+                logger.LogDebug("Total Count: {TotalCount}", totalCount);
+                logger.LogDebug("Count: {Count}", count);
+                logger.LogDebug("Smoothed Count: {SmoothedCount}", smoothedCount);
+                logger.LogDebug("Weighted Percentage: {WeighedPercentage}", weighedPercentage);
+
+                if (lastMatchResult.P1Attack == attackGroup.Key)
+                {
+                    var recencyBais = lastMatchResult.Result switch
+                    {
+                        ResultTypes.Win => 0.3m,
+                        ResultTypes.Draw => 0.15m,
+                        _ => -0.075m
+                    };
+
+                    logger.LogDebug("Recency Bais: {RecencyBais}", recencyBais);
+
+                    weighedPercentage *= 1 + recencyBais;
+
+                    logger.LogDebug("Boosted Percentage: {WeighedPercentage}", weighedPercentage);
+                }
 
                 return new { Attack = attackGroup.Key, WeighedPercentage = weighedPercentage };
             })
