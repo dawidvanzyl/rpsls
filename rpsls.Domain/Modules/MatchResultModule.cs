@@ -14,7 +14,8 @@ public interface IMatchResultModule
     Task SaveAsync();
 }
 
-public class MatchResultModule(IMatchResultRepository matchResultRepository) : IMatchResultModule
+public class MatchResultModule(IMatchResultRepository matchResultRepository)
+    : IMatchResultModule
 {
     private readonly Lazy<IList<MatchResult>> _matchResults =
         new Lazy<IList<MatchResult>>(

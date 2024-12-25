@@ -17,11 +17,11 @@ public static class ServiceCollectionExtension
 
     public static IServiceCollection Domain(this IServiceCollection services)
     {
-        services.AddSingleton<IAlgorithm, AttackAlgorithm>();
+        services.AddSingleton<IAlgorithm, SmoothedCountAlgorithm>();
 
         services
             .AddSingleton<IMatchResultModule, MatchResultModule>()
-            .AddSingleton<IRuleSetModule, RuleSetModule>();
+            .AddSingleton<IRuleModule, RuleModule>();
 
         return services;
     }
@@ -30,7 +30,7 @@ public static class ServiceCollectionExtension
     {
         services
             .AddSingleton<IMatchResultRepository, MatchResultRepository>()
-            .AddSingleton<IRuleSetRepository, RuleSetRepository>();
+            .AddSingleton<IRuleRepository, RuleRepository>();
 
         return services;
     }

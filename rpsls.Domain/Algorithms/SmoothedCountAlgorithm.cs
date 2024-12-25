@@ -4,10 +4,10 @@ using rpsls.Entities.Enums;
 
 namespace rpsls.Domain.Algorithms;
 
-public class AttackAlgorithm(
+public class SmoothedCountAlgorithm(
     IMatchResultModule matchResultModule,
-    IRuleSetModule ruleSetModule,
-    ILogger<AttackAlgorithm> logger)
+    IRuleModule ruleSetModule,
+    ILogger<SmoothedCountAlgorithm> logger)
     : IAlgorithm
 {
     public AttackTypes CalculateAttack()

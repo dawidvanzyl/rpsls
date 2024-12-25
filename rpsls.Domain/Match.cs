@@ -1,8 +1,9 @@
-﻿using rpsls.Entities.Enums;
+﻿using rpsls.Domain.Modules;
+using rpsls.Entities.Enums;
 
 namespace rpsls.Domain;
 
-public class Match(int winningScore)
+public class Match(int winningScore, IRuleModule ruleModule)
 {
     private readonly int[] _scores = [0, 0];
 
@@ -13,9 +14,9 @@ public class Match(int winningScore)
             return ResultTypes.Draw;
         }
 
-        if ((p1 == AttackTypes.Rock && p2 == AttackTypes.Scissor)
-            || (p1 == AttackTypes.Paper && p2 == AttackTypes.Rock)
-            || (p1 == AttackTypes.Scissor && p2 == AttackTypes.Paper))
+        var winningAttack = ruleModule.GetAttackToBeat(p2);
+
+        if (winningAttack == p1)
         {
             _scores[0]++;
             return ResultTypes.Win;

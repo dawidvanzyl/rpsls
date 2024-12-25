@@ -13,12 +13,16 @@ public interface IGameService
     Task SaveMatchResultsAsync();
 }
 
-public class GameService(IMatchResultModule matchResultModule, IAlgorithm algorithm) : IGameService
+public class GameService(
+    IMatchResultModule matchResultModule,
+    IRuleModule ruleModule,
+    IAlgorithm algorithm)
+    : IGameService
 {
     public Match CreateMatch(int bestOf)
     {
         var winningScore = (int)Math.Round(bestOf * 0.66m);
-        return new Match(winningScore);
+        return new Match(winningScore, ruleModule);
     }
 
     public IAlgorithm GetAlgorithm()
