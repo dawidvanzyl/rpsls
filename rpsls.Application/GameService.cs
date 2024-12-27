@@ -1,33 +1,59 @@
-﻿using rpsls.Domain;
-using rpsls.Domain.Algorithms;
-using rpsls.Domain.Modules;
+﻿using rpsls.Domain.Modules;
+using rpsls.Entities.Enums;
 
 namespace rpsls.Application;
 
 public interface IGameService
 {
-    Match CreateMatch(int bestOf);
+    void CreateMatch(int bestOf);
 
-    IAlgorithm GetAlgorithm();
+    ResultTypes GetResult(AttackTypes p1, AttackTypes p2);
+
+    int[] GetScores();
+
+    bool IsOver();
 
     Task SaveMatchResultsAsync();
 }
 
-public class GameService(
-    IMatchResultModule matchResultModule,
-    IRuleModule ruleModule,
-    IAlgorithm algorithm)
+public class GameService(IMatchResultModule matchResultModule, IRuleModule ruleModule)
     : IGameService
 {
-    public Match CreateMatch(int bestOf)
+    private readonly int[] _scores = [0, 0];
+    private int _winningScore;
+
+    public void CreateMatch(int bestOf)
     {
-        var winningScore = (int)Math.Round(bestOf * 0.66m);
-        return new Match(winningScore, ruleModule);
+        _winningScore = (int)Math.Round(bestOf * 0.66m);
     }
 
-    public IAlgorithm GetAlgorithm()
+    public ResultTypes GetResult(AttackTypes p1, AttackTypes p2)
     {
-        return algorithm;
+        if (p1 == p2)
+        {
+            return ResultTypes.Draw;
+        }
+
+        var winningAttack = ruleModule.GetAttackToBeat(p2);
+
+        if (winningAttack == p1)
+        {
+            _scores[0]++;
+            return ResultTypes.Win;
+        }
+
+        _scores[1]++;
+        return ResultTypes.Loss;
+    }
+
+    public int[] GetScores()
+    {
+        return _scores;
+    }
+
+    public bool IsOver()
+    {
+        return _scores.Any(score => score == _winningScore);
     }
 
     public async Task SaveMatchResultsAsync()
