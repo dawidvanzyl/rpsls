@@ -26,7 +26,7 @@ public static class ServiceCollectionExtension
             .AddSingleton<IRecencyBiasAlgorithm<WeightedRecencyBiasInput>, WeightedRecencyBias>();
 
         services
-            .AddSingleton<IMatchResultModule, MatchResultModule>()
+            .AddSingleton<IMatchModule, MatchModule>()
             .AddSingleton<IRuleModule, RuleModule>();
 
         return services;
@@ -35,7 +35,7 @@ public static class ServiceCollectionExtension
     public static IServiceCollection Infrastructure(this IServiceCollection services)
     {
         services
-            .AddSingleton<IMatchResultRepository, MatchResultRepository>()
+            .AddSingleton<IMatchRepository, MatchRepository>()
             .AddSingleton<IRuleRepository, RuleRepository>();
 
         return services;

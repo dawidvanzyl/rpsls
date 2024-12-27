@@ -2,7 +2,7 @@
 
 namespace rpsls.Infrastructure.Dtos;
 
-public class MatchResultDto
+public class MatchDto
 {
     public int AttackCount { get; init; }
     public AttackTypes Player1 { get; init; }

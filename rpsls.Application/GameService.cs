@@ -16,7 +16,7 @@ public interface IGameService
     Task SaveMatchResultsAsync();
 }
 
-public class GameService(IMatchResultModule matchResultModule, IRuleModule ruleModule)
+public class GameService(IMatchModule matchModule, IRuleModule ruleModule)
     : IGameService
 {
     private readonly int[] _scores = [0, 0];
@@ -58,6 +58,6 @@ public class GameService(IMatchResultModule matchResultModule, IRuleModule ruleM
 
     public async Task SaveMatchResultsAsync()
     {
-        await matchResultModule.SaveAsync();
+        await matchModule.SaveAsync();
     }
 }

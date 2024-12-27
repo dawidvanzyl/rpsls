@@ -6,7 +6,7 @@ using Sharprompt;
 namespace rpsls.Console;
 
 public class HostedService(
-    IMatchResultModule matchResultModule,
+    IMatchModule matchModule,
     IGameService gameService,
     IAttackService attackService)
 {
@@ -25,13 +25,15 @@ public class HostedService(
             System.Console.WriteLine($"{p2} attack: {p2Attack}");
             var result = gameService.GetResult(p1Attack, p2Attack);
 
-            matchResultModule.Add(p1Attack, p2Attack, result);
+            matchModule.Add(p1Attack, p2Attack, result);
 
             System.Console.WriteLine(result);
             System.Console.WriteLine();
         }
 
         await gameService.SaveMatchResultsAsync();
+        System.Console.WriteLine("Matches saved");
+
         var matchScores = gameService.GetScores();
         System.Console.WriteLine("Game over");
         System.Console.WriteLine($"{p1} - {matchScores[0]} : {p2} - {matchScores[1]}");

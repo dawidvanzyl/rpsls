@@ -5,7 +5,7 @@ namespace rpsls.Infrastructure;
 
 internal static class DataTableFactory
 {
-    internal static DataTable CreateMatchResultsTable(IEnumerable<MatchResult> matchResults)
+    internal static DataTable CreateMatchResultsTable(IEnumerable<Match> matchResults)
     {
         var tvpMatchResult = new DataTable();
         tvpMatchResult.Columns.Add("Player1", typeof(int));

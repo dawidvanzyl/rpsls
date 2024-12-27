@@ -5,21 +5,21 @@ using System.Collections.Immutable;
 
 namespace rpsls.Domain.Modules;
 
-public interface IMatchResultModule
+public interface IMatchModule
 {
     void Add(AttackTypes p1, AttackTypes p2, ResultTypes result);
 
-    IImmutableList<MatchResult> GetAll();
+    IImmutableList<Match> GetAll();
 
     Task SaveAsync();
 }
 
-public class MatchResultModule(IMatchResultRepository matchResultRepository)
-    : IMatchResultModule
+public class MatchModule(IMatchRepository matchRepository)
+    : IMatchModule
 {
-    private readonly Lazy<IList<MatchResult>> _matchResults =
-        new Lazy<IList<MatchResult>>(
-            () => matchResultRepository
+    private readonly Lazy<IList<Match>> _matches =
+        new Lazy<IList<Match>>(
+            () => matchRepository
                     .GetAllAsync()
                     .GetAwaiter()
                     .GetResult());
@@ -31,7 +31,7 @@ public class MatchResultModule(IMatchResultRepository matchResultRepository)
             ? 1
             : lastMatchResult.ConsecutiveRepeats + 1;
 
-        GetValue().Add(new MatchResult(
+        GetValue().Add(new Match(
             attackCount,
             true,
             p1,
@@ -39,20 +39,20 @@ public class MatchResultModule(IMatchResultRepository matchResultRepository)
             result));
     }
 
-    public IImmutableList<MatchResult> GetAll()
+    public IImmutableList<Match> GetAll()
     {
         return GetValue().ToImmutableList();
     }
 
     public async Task SaveAsync()
     {
-        await matchResultRepository.CreateAsync(GetValue().Where(matchResult => matchResult.IsNew));
+        await matchRepository.CreateAsync(GetValue().Where(matchResult => matchResult.IsNew));
     }
 
-    private IList<MatchResult> GetValue()
+    private IList<Match> GetValue()
     {
-        return _matchResults == null
-            ? throw new InvalidOperationException(nameof(_matchResults))
-            : _matchResults.Value;
+        return _matches == null
+            ? throw new InvalidOperationException(nameof(_matches))
+            : _matches.Value;
     }
 }

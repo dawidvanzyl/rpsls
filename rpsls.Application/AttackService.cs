@@ -14,7 +14,7 @@ public interface IAttackService
 }
 
 public class AttackService(
-    IMatchResultModule matchResultModule,
+    IMatchModule matchModule,
     IRuleModule ruleModule,
     IWeightAlgorithm<WeightedSmoothedCountInput> weightAlgorithm,
     IRecencyBiasAlgorithm<WeightedRecencyBiasInput> recencyBiasAlgorithm,
@@ -22,23 +22,23 @@ public class AttackService(
 {
     public AttackTypes CalculateAttack()
     {
-        var matchResults = matchResultModule.GetAll();
+        var matchHistory = matchModule.GetAll();
 
-        if (!matchResults.Any())
+        if (!matchHistory.Any())
         {
             return (AttackTypes)Random.Shared.Next(1, 4);
         }
 
-        var totalCount = matchResults.Count;
-        var lastMatchResult = matchResults[matchResults.Count - 1];
+        var totalCount = matchHistory.Count;
+        var lastMatch = matchHistory[matchHistory.Count - 1];
 
-        var attackPercentages = matchResults
+        var attackPercentages = matchHistory
             .GroupBy((matchResult) => matchResult.P1Attack)
             .Select(attackGroup =>
                 new
                 {
                     Attack = attackGroup.Key,
-                    WeighedPercentage = CalculateWeightedPercentage(attackGroup, totalCount, lastMatchResult)
+                    WeighedPercentage = CalculateWeightedPercentage(attackGroup, totalCount, lastMatch)
                 })
             .OrderByDescending(a => a.WeighedPercentage)
             .ToList();
@@ -48,7 +48,7 @@ public class AttackService(
         return ruleModule.GetAttackToBeat(player1Prediction);
     }
 
-    private decimal CalculateWeightedPercentage(IGrouping<AttackTypes, MatchResult> attackGroup, int totalCount, MatchResult lastMatchResult)
+    private decimal CalculateWeightedPercentage(IGrouping<AttackTypes, Match> attackGroup, int totalCount, Match lastMatch)
     {
         var count = attackGroup.Count();
 
@@ -63,12 +63,12 @@ public class AttackService(
                 TotalCount = totalCount
             });
 
-        if (lastMatchResult.P1Attack == attackGroup.Key)
+        if (lastMatch.P1Attack == attackGroup.Key)
         {
             weighedPercentage = recencyBiasAlgorithm.ApplyRecencyBias(
                 new WeightedRecencyBiasInput
                 {
-                    LastResult = lastMatchResult.Result,
+                    LastResult = lastMatch.Result,
                     WeighedPercentage = weighedPercentage
                 });
         }

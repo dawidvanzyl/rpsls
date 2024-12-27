@@ -2,7 +2,7 @@
 
 namespace rpsls.Entities;
 
-public record MatchResult(
+public record Match(
     int ConsecutiveRepeats,
     bool IsNew,
     AttackTypes P1Attack,
