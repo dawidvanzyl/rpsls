@@ -7,4 +7,5 @@ public record Match(
     bool IsNew,
     AttackTypes P1Attack,
     AttackTypes P2Attack,
-    ResultTypes Result);
+    ResultTypes Result,
+    int Round);

@@ -36,7 +36,8 @@ public class MatchModule(IMatchRepository matchRepository)
             true,
             p1,
             p2,
-            result));
+            result,
+            GetValue().Count + 1));
     }
 
     public IImmutableList<Match> GetAll()

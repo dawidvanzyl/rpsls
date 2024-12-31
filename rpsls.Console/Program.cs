@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using rpsls.IoC;
+using rpsls.IoC.Options;
 using Serilog;
 
 namespace rpsls.Console;
@@ -15,6 +16,11 @@ public static class Program
             IConfiguration configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
+
+            services.Configure<AlgorithmOptions>(options =>
+                configuration
+                    .GetSection("AlgorithmOptions")
+                    .Bind(options));
 
             services
                 .Default()

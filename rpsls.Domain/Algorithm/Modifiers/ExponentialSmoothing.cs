@@ -1,14 +1,17 @@
 ﻿using Microsoft.Extensions.Logging;
-using rpsls.Domain.Algorithms.Models;
+using rpsls.Domain.Algorithms.Contexts;
+using rpsls.Domain.Algorithms.Modifiers.Abstracts;
+using rpsls.Entities;
+using rpsls.Entities.Enums;
 
-namespace rpsls.Domain.Algorithms.Weight;
+namespace rpsls.Domain.Algorithms.Modifiers;
 
-public class WeightedSmoothedCount(ILogger<WeightedSmoothedCount> logger)
-    : IWeightAlgorithm<WeightedSmoothedCountInput>
+public class ExponentialSmoothing(ILogger<ExponentialSmoothing> logger)
+    : AbstractModifier(logger)
 {
-    public decimal CalculateWeightedPercentage(WeightedSmoothedCountInput input)
+    protected override decimal CalculateWeightedPercentage(IGrouping<AttackTypes, Match> attackGroup, AlgorithmContext context)
     {
-        if (input.TotalCount == 0)
+        if (context.TotalCount == 0)
         {
             return 0m; // Avoid division by zero
         }
@@ -17,13 +20,13 @@ public class WeightedSmoothedCount(ILogger<WeightedSmoothedCount> logger)
         var alpha = 0.1m; // Smoothing factor
 
         // Apply exponential smoothing over the range of consecutive repeats
-        for (var consecutiveRepeats = 1; consecutiveRepeats <= input.GroupCount; consecutiveRepeats++)
+        for (var consecutiveRepeats = 1; consecutiveRepeats <= attackGroup.Count(); consecutiveRepeats++)
         {
             smoothedCount = (alpha * consecutiveRepeats) + ((1 - alpha) * smoothedCount);
         }
 
         // Calculate the weighted percentage
-        var weightedPercentage = smoothedCount / input.TotalCount;
+        var weightedPercentage = smoothedCount / context.TotalCount;
 
         logger.LogDebug("Smoothed Count: {SmoothedCount}", smoothedCount);
         logger.LogDebug("Weighted Percentage: {WeightedPercentage}", weightedPercentage);

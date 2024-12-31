@@ -39,7 +39,8 @@ public class MatchRepository(IConfiguration configuration)
                 false,
                 dto.Player1,
                 dto.Player2,
-                dto.Result))
+                dto.Result,
+                dto.Round))
             .ToList();
     }
 }
