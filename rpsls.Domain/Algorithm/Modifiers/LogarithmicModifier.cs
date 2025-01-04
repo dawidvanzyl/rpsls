@@ -16,8 +16,8 @@ namespace rpsls.Domain.Algorithms.Modifiers
             // Calculate the weighted percentage
             var weightedPercentage = context.TotalCount / logarithmicCount;
 
-            logger.LogDebug("Logarithmic Count: {LogarithmicCount}", logarithmicCount);
-            logger.LogDebug("Weighted Percentage: {WeightedPercentage}", weightedPercentage);
+            logger.LogTrace("Logarithmic Count: {LogarithmicCount}", logarithmicCount);
+            logger.LogTrace("Weighted Percentage: {WeightedPercentage}", weightedPercentage);
 
             return (decimal)weightedPercentage;
         }

@@ -20,7 +20,7 @@ public class HostedService(
         while (!gameService.IsOver())
         {
             var p1Attack = Prompt.Select<AttackTypes>($"{p1} attack");
-            var p2Attack = attackService.CalculateAttack();
+            var p2Attack = attackService.PredictNextAttack();
 
             System.Console.WriteLine($"{p2} attack: {p2Attack}");
             var result = gameService.GetResult(p1Attack, p2Attack);

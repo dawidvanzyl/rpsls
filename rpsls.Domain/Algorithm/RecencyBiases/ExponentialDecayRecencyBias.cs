@@ -23,9 +23,9 @@ namespace rpsls.Domain.Algorithms.RecencyBiases
             var decayedBias = recencyBiasFactor * (decimal)Math.Exp((double)(-decayRate * roundsSinceLastMatch));
             var boostedPercentage = percentage + decayedBias;
 
-            logger.LogDebug("Decay Rate: {DecayRate}", decayRate);
-            logger.LogDebug("Decayed Bias: {DecayedBias}", decayedBias);
-            logger.LogDebug("Boosted Percentage: {BoostedPercentage}", boostedPercentage);
+            logger.LogTrace("Decay Rate: {DecayRate}", decayRate);
+            logger.LogTrace("Decayed Bias: {DecayedBias}", decayedBias);
+            logger.LogTrace("Boosted Percentage: {BoostedPercentage}", boostedPercentage);
 
             return boostedPercentage;
         }

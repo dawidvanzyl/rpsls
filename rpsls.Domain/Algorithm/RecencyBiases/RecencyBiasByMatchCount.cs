@@ -18,8 +18,8 @@ namespace rpsls.Domain.Algorithms.RecencyBiases
             var recencyBiasBoost = 1 + recentMatchBias;
             var boostedPercentage = percentage * recencyBiasBoost;
 
-            logger.LogDebug("Recency Bais Boost: {RecencyBiasBoost}", recencyBiasBoost);
-            logger.LogDebug("Boosted Percentage: {BoostedPercentage}", boostedPercentage);
+            logger.LogTrace("Recency Bais Boost: {RecencyBiasBoost}", recencyBiasBoost);
+            logger.LogTrace("Boosted Percentage: {BoostedPercentage}", boostedPercentage);
 
             return boostedPercentage;
         }

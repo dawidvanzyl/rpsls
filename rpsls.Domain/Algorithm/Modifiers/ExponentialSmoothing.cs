@@ -28,8 +28,8 @@ public class ExponentialSmoothing(ILogger<ExponentialSmoothing> logger)
         // Calculate the weighted percentage
         var weightedPercentage = smoothedCount / context.TotalCount;
 
-        logger.LogDebug("Smoothed Count: {SmoothedCount}", smoothedCount);
-        logger.LogDebug("Weighted Percentage: {WeightedPercentage}", weightedPercentage);
+        logger.LogTrace("Smoothed Count: {SmoothedCount}", smoothedCount);
+        logger.LogTrace("Weighted Percentage: {WeightedPercentage}", weightedPercentage);
 
         return weightedPercentage;
     }

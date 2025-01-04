@@ -11,12 +11,14 @@ namespace rpsls.Domain.Algorithms.Modifiers.Abstracts
     {
         public IImmutableDictionary<AttackTypes, decimal> CalculatePercentages(IImmutableList<Match> matchHistory, AlgorithmContext context)
         {
+            logger.LogDebug("Calculate weighed percentage");
+
             IImmutableDictionary<AttackTypes, decimal> attackPercentages = matchHistory
                 .GroupBy((matchResult) => matchResult.P1Attack)
                 .Select(attackGroup =>
                 {
-                    logger.LogDebug("Attack: {Attack}", attackGroup.Key);
-                    logger.LogDebug("Count: {Count}", attackGroup.Count());
+                    logger.LogTrace("Attack: {Attack}", attackGroup.Key);
+                    logger.LogTrace("Count: {Count}", attackGroup.Count());
 
                     return new
                     {

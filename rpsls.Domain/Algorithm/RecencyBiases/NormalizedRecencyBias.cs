@@ -13,9 +13,9 @@ namespace rpsls.Domain.Algorithms.RecencyBiases
             var maxPercentage = 100m; // Assume the percentage is normalized to 0-100
             var normalizedBias = recencyBiasFactor * (percentage / maxPercentage);
 
-            logger.LogDebug("Recency Bias Factor: {RecencyBiasFactor}", recencyBiasFactor);
-            logger.LogDebug("Max Percentage: {MaxPercentage}", maxPercentage);
-            logger.LogDebug("Normalized Bias: {NormalizedBias}", normalizedBias);
+            logger.LogTrace("Recency Bias Factor: {RecencyBiasFactor}", recencyBiasFactor);
+            logger.LogTrace("Max Percentage: {MaxPercentage}", maxPercentage);
+            logger.LogTrace("Normalized Bias: {NormalizedBias}", normalizedBias);
 
             return normalizedBias;
         }

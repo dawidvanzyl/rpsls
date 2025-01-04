@@ -8,10 +8,17 @@ namespace rpsls.Domain.Algorithms.RecencyBiases.Abstracts;
 public abstract class AbstactRecencyBias(ILogger<AbstactRecencyBias> logger)
     : IRecencyBiasAlgorithm
 {
-    public IDictionary<AttackTypes, decimal> ApplyRecencyBias(
+    public IImmutableDictionary<AttackTypes, decimal> ApplyRecencyBias(
         IImmutableDictionary<AttackTypes, decimal> attackPercentages,
         AlgorithmContext context)
     {
+        if (!context.MatchHistory.Any(match => match.IsNew))
+        {
+            return attackPercentages;
+        }
+
+        logger.LogDebug("Apply recency bais");
+
         var recencyBiasFactor = context.LastMatch.Result switch
         {
             ResultTypes.Win => 0.3m,
@@ -20,13 +27,13 @@ public abstract class AbstactRecencyBias(ILogger<AbstactRecencyBias> logger)
         };
 
         var boostedAttackPercentages = attackPercentages
-            .ToDictionary(
+            .ToImmutableDictionary(
                 kv => kv.Key,
                 kv =>
                 {
                     if (context.LastMatch.P1Attack == kv.Key)
                     {
-                        logger.LogDebug("Attack: {Attack}", kv.Key);
+                        logger.LogTrace("Attack: {Attack}", kv.Key);
 
                         var boostedPercentage = GetBoostedPercentage(kv.Key, kv.Value, recencyBiasFactor, context);
 

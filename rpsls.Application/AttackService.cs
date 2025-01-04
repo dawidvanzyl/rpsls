@@ -9,7 +9,7 @@ namespace rpsls.Application;
 
 public interface IAttackService
 {
-    AttackTypes CalculateAttack();
+    AttackTypes PredictNextAttack();
 }
 
 public class AttackService(
@@ -19,11 +19,11 @@ public class AttackService(
     IRecencyBiasAlgorithm recencyBiasAlgorithm,
     ILogger<AttackService> logger) : IAttackService
 {
-    public AttackTypes CalculateAttack()
+    public AttackTypes PredictNextAttack()
     {
         var matchHistory = matchModule.GetAll();
 
-        logger.LogDebug("Total Count: {TotalCount}", matchHistory.Count);
+        logger.LogTrace("Total Count: {TotalCount}", matchHistory.Count);
 
         if (!matchHistory.Any())
         {
@@ -37,14 +37,20 @@ public class AttackService(
             TotalCount = matchHistory.Count
         };
 
-        var attackPercentages = recencyBiasAlgorithm.ApplyRecencyBias(
-            modifierAlgorithm.CalculatePercentages(matchHistory, context),
-            context);
+        var attackPercentages = modifierAlgorithm.CalculatePercentages(matchHistory, context);
+        attackPercentages = recencyBiasAlgorithm.ApplyRecencyBias(attackPercentages, context);
 
-        var player1Prediction = attackPercentages
+        var predictedNextAttack = attackPercentages
             .OrderByDescending(kv => kv.Value)
             .First();
 
-        return ruleModule.GetAttackToBeat(player1Prediction.Key);
+        foreach (var attackPercentage in attackPercentages)
+        {
+            logger.LogDebug("{Attack}: {Percentage}", attackPercentage.Key, attackPercentage.Value);
+        }
+
+        logger.LogDebug("Predicted next attack: {PredictedNextAttack}", predictedNextAttack);
+
+        return ruleModule.GetAttackToBeat(predictedNextAttack.Key);
     }
 }
