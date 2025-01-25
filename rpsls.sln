@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rpsls.Infrastructure", "rps
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rpsls.Entities", "rpsls.Entities\rpsls.Entities.csproj", "{EA70ADBF-C719-4088-8FEE-7CB478AE2F16}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rpsls.Domain.Tests", "rpsls.Domain.Tests\rpsls.Domain.Tests.csproj", "{9723CAEC-8CB7-4078-82E4-5D76FBCB6C62}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{077682A5-2A24-47FA-8BFB-CC5BCFC9F750}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,9 +49,16 @@ Global
 		{EA70ADBF-C719-4088-8FEE-7CB478AE2F16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA70ADBF-C719-4088-8FEE-7CB478AE2F16}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA70ADBF-C719-4088-8FEE-7CB478AE2F16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9723CAEC-8CB7-4078-82E4-5D76FBCB6C62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9723CAEC-8CB7-4078-82E4-5D76FBCB6C62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9723CAEC-8CB7-4078-82E4-5D76FBCB6C62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9723CAEC-8CB7-4078-82E4-5D76FBCB6C62}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9723CAEC-8CB7-4078-82E4-5D76FBCB6C62} = {077682A5-2A24-47FA-8BFB-CC5BCFC9F750}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3D606393-6358-4358-AD4E-B983B8C8F639}

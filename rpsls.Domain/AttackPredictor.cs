@@ -1,23 +1,22 @@
 ﻿using Microsoft.Extensions.Logging;
-using rpsls.Domain.Algorithms.Contexts;
-using rpsls.Domain.Algorithms.Modifiers;
 using rpsls.Domain.Algorithms.RecencyBiases;
+using rpsls.Domain.Algorithms.Weighted;
 using rpsls.Domain.Modules;
 using rpsls.Entities.Enums;
 
 namespace rpsls.Application;
 
-public interface IAttackService
+public interface IAttackPredictor
 {
     AttackTypes PredictNextAttack();
 }
 
-public class AttackService(
+public class AttackPredictor(
     IMatchModule matchModule,
     IRuleModule ruleModule,
-    IModifierAlgorithm modifierAlgorithm,
+    IWeightingAlgorithm weightedAlgorithm,
     IRecencyBiasAlgorithm recencyBiasAlgorithm,
-    ILogger<AttackService> logger) : IAttackService
+    ILogger<AttackPredictor> logger) : IAttackPredictor
 {
     public AttackTypes PredictNextAttack()
     {
@@ -30,23 +29,20 @@ public class AttackService(
             return (AttackTypes)Random.Shared.Next(1, 4);
         }
 
-        var context = new AlgorithmContext
+        var attackWeights = weightedAlgorithm.CalculateWeights(matchHistory);
+
+        if (!matchHistory[^1].IsNew)
         {
-            LastMatch = matchHistory[matchHistory.Count - 1],
-            MatchHistory = matchHistory,
-            TotalCount = matchHistory.Count
-        };
+            attackWeights = recencyBiasAlgorithm.ApplyRecencyBias(attackWeights, matchHistory);
+        }
 
-        var attackPercentages = modifierAlgorithm.CalculatePercentages(matchHistory, context);
-        attackPercentages = recencyBiasAlgorithm.ApplyRecencyBias(attackPercentages, context);
-
-        var predictedNextAttack = attackPercentages
+        var predictedNextAttack = attackWeights
             .OrderByDescending(kv => kv.Value)
             .First();
 
-        foreach (var attackPercentage in attackPercentages)
+        foreach (var attackPercentage in attackWeights)
         {
-            logger.LogDebug("{Attack}: {Percentage}", attackPercentage.Key, attackPercentage.Value);
+            logger.LogDebug("{Attack}: {Weight}", attackPercentage.Key, attackPercentage.Value);
         }
 
         logger.LogDebug("Predicted next attack: {PredictedNextAttack}", predictedNextAttack);

@@ -8,7 +8,7 @@ namespace rpsls.Console;
 public class HostedService(
     IMatchModule matchModule,
     IGameService gameService,
-    IAttackService attackService)
+    IAttackPredictor attackPredictor)
 {
     public async Task Execute()
     {
@@ -20,7 +20,7 @@ public class HostedService(
         while (!gameService.IsOver())
         {
             var p1Attack = Prompt.Select<AttackTypes>($"{p1} attack");
-            var p2Attack = attackService.PredictNextAttack();
+            var p2Attack = attackPredictor.PredictNextAttack();
 
             System.Console.WriteLine($"{p2} attack: {p2Attack}");
             var result = gameService.GetResult(p1Attack, p2Attack);

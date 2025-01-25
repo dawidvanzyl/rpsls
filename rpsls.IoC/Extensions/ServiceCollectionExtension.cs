@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using rpsls.Application;
 using rpsls.Domain.Algorithms.Modifiers;
 using rpsls.Domain.Algorithms.RecencyBiases;
+using rpsls.Domain.Algorithms.Weighted;
 using rpsls.Domain.Modules;
 using rpsls.Infrastructure.Repositories;
 using rpsls.IoC.Options;
@@ -14,8 +15,7 @@ public static class ServiceCollectionExtension
     public static IServiceCollection Application(this IServiceCollection services)
     {
         services
-            .AddTransient<IGameService, GameService>()
-            .AddTransient<IAttackService, AttackService>();
+            .AddTransient<IGameService, GameService>();
 
         return services;
     }
@@ -23,8 +23,8 @@ public static class ServiceCollectionExtension
     public static IServiceCollection Domain(this IServiceCollection services)
     {
         services
-            .AddKeyedSingleton<IModifierAlgorithm, ExponentialSmoothing>(nameof(ExponentialSmoothing))
-            .AddKeyedSingleton<IModifierAlgorithm, LogarithmicModifier>(nameof(LogarithmicModifier))
+            .AddKeyedSingleton<IWeightingAlgorithm, ExponentialSmoothing>(nameof(ExponentialSmoothing))
+            .AddKeyedSingleton<IWeightingAlgorithm, LogarithmicWeighting>(nameof(LogarithmicWeighting))
             .AddKeyedSingleton<IRecencyBiasAlgorithm, WeightedRecencyBias>(nameof(WeightedRecencyBias))
             .AddKeyedSingleton<IRecencyBiasAlgorithm, RecencyBiasByMatchCount>(nameof(RecencyBiasByMatchCount))
             .AddKeyedSingleton<IRecencyBiasAlgorithm, ExponentialDecayRecencyBias>(nameof(ExponentialDecayRecencyBias))
@@ -33,7 +33,7 @@ public static class ServiceCollectionExtension
         services.AddSingleton(sp =>
         {
             var options = sp.GetRequiredService<IOptions<AlgorithmOptions>>().Value;
-            return sp.GetKeyedService<IModifierAlgorithm>(options.Modifier);
+            return sp.GetKeyedService<IWeightingAlgorithm>(options.Modifier);
         });
 
         services.AddSingleton(sp =>
@@ -45,6 +45,8 @@ public static class ServiceCollectionExtension
         services
             .AddSingleton<IMatchModule, MatchModule>()
             .AddSingleton<IRuleModule, RuleModule>();
+
+        services.AddSingleton<IAttackPredictor, AttackPredictor>();
 
         return services;
     }

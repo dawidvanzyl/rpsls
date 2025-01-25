@@ -1,25 +1,18 @@
 ﻿using Microsoft.Extensions.Logging;
-using rpsls.Domain.Algorithms.Contexts;
+using rpsls.Entities;
 using rpsls.Entities.Enums;
 using System.Collections.Immutable;
 
 namespace rpsls.Domain.Algorithms.RecencyBiases.Abstracts;
 
-public abstract class AbstactRecencyBias(ILogger<AbstactRecencyBias> logger)
+public abstract class AbstactRecencyBiasAlgorithm(ILogger<AbstactRecencyBiasAlgorithm> logger)
     : IRecencyBiasAlgorithm
 {
-    public IImmutableDictionary<AttackTypes, decimal> ApplyRecencyBias(
-        IImmutableDictionary<AttackTypes, decimal> attackPercentages,
-        AlgorithmContext context)
+    public IImmutableDictionary<AttackTypes, decimal> ApplyRecencyBias(IImmutableDictionary<AttackTypes, decimal> attackPercentages, IImmutableList<Match> matchHistory)
     {
-        if (!context.MatchHistory.Any(match => match.IsNew))
-        {
-            return attackPercentages;
-        }
-
         logger.LogDebug("Apply recency bais");
 
-        var recencyBiasFactor = context.LastMatch.Result switch
+        var recencyBiasFactor = matchHistory[^1].Result switch
         {
             ResultTypes.Win => 0.3m,
             ResultTypes.Draw => 0.15m,
@@ -31,11 +24,11 @@ public abstract class AbstactRecencyBias(ILogger<AbstactRecencyBias> logger)
                 kv => kv.Key,
                 kv =>
                 {
-                    if (context.LastMatch.P1Attack == kv.Key)
+                    if (matchHistory[^1].P1Attack == kv.Key)
                     {
                         logger.LogTrace("Attack: {Attack}", kv.Key);
 
-                        var boostedPercentage = GetBoostedPercentage(kv.Key, kv.Value, recencyBiasFactor, context);
+                        var boostedPercentage = GetBoostedPercentage(kv.Key, kv.Value, recencyBiasFactor, matchHistory);
 
                         return boostedPercentage;
                     }
@@ -52,5 +45,5 @@ public abstract class AbstactRecencyBias(ILogger<AbstactRecencyBias> logger)
         AttackTypes attack,
         decimal percentage,
         decimal recencyBiasFactor,
-        AlgorithmContext context);
+        IImmutableList<Match> matchHistory);
 }
