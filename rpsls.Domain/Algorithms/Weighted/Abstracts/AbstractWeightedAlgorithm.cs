@@ -1,18 +1,17 @@
 ﻿using Microsoft.Extensions.Logging;
 using rpsls.Entities;
 using rpsls.Entities.Enums;
-using System.Collections.Immutable;
 
 namespace rpsls.Domain.Algorithms.Weighted.Abstracts;
 
 public abstract class AbstractWeightedAlgorithm(ILogger<AbstractWeightedAlgorithm> logger)
     : IWeightingAlgorithm
 {
-    public IImmutableDictionary<AttackTypes, decimal> CalculateWeights(IImmutableList<Match> matchHistory)
+    public IDictionary<AttackTypes, decimal> CalculateWeights(IList<Round> history)
     {
         logger.LogDebug("Calculate weighed percentage");
 
-        IImmutableDictionary<AttackTypes, decimal> attackPercentages = matchHistory
+        IDictionary<AttackTypes, decimal> attackPercentages = history
             .GroupBy((matchResult) => matchResult.P1Attack)
             .Select(attackGroup =>
             {
@@ -22,15 +21,15 @@ public abstract class AbstractWeightedAlgorithm(ILogger<AbstractWeightedAlgorith
                 return new
                 {
                     Attack = attackGroup.Key,
-                    Weight = CalculateWeight(attackGroup, matchHistory)
+                    Weight = CalculateWeight(attackGroup, history)
                 };
             })
-            .ToImmutableDictionary(
+            .ToDictionary(
                 a => a.Attack,
                 a => a.Weight);
 
         return attackPercentages;
     }
 
-    protected abstract decimal CalculateWeight(IGrouping<AttackTypes, Match> attackGroup, IImmutableList<Match> matchHistory);
+    protected abstract decimal CalculateWeight(IGrouping<AttackTypes, Round> attackGroup, IList<Round> history);
 }

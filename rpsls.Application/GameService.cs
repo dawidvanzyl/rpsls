@@ -1,11 +1,12 @@
 ﻿using rpsls.Domain.Modules;
+using rpsls.Entities;
 using rpsls.Entities.Enums;
 
 namespace rpsls.Application;
 
 public interface IGameService
 {
-    void CreateMatch(int bestOf);
+    Game Create(int bestOf);
 
     ResultTypes GetResult(AttackTypes p1, AttackTypes p2);
 
@@ -13,51 +14,44 @@ public interface IGameService
 
     bool IsOver();
 
-    Task SaveMatchResultsAsync();
+    Task SaveAsync();
 }
 
-public class GameService(IMatchModule matchModule, IRuleModule ruleModule)
+public class GameService(IGameModule gameModule, IRuleModule ruleModule)
     : IGameService
 {
-    private readonly int[] _scores = [0, 0];
     private int _winningScore;
 
-    public void CreateMatch(int bestOf)
+    public Game Create(int bestOf)
     {
         _winningScore = (int)Math.Round(bestOf * 0.66m);
+        gameModule.Create(bestOf);
+
+        return gameModule.Current;
     }
 
     public ResultTypes GetResult(AttackTypes p1, AttackTypes p2)
     {
-        if (p1 == p2)
+        return p1 switch
         {
-            return ResultTypes.Draw;
-        }
-
-        var winningAttack = ruleModule.GetAttackToBeat(p2);
-
-        if (winningAttack == p1)
-        {
-            _scores[0]++;
-            return ResultTypes.Win;
-        }
-
-        _scores[1]++;
-        return ResultTypes.Loss;
+            _ when p1 == p2 => ResultTypes.Draw,
+            _ when p1 == ruleModule.GetAttackToBeat(p2) => ResultTypes.Win,
+            _ => ResultTypes.Loss
+        };
     }
 
     public int[] GetScores()
     {
-        return _scores;
+        return gameModule.Current.Scores;
     }
 
     public bool IsOver()
     {
-        return _scores.Any(score => score == _winningScore);
+        return gameModule.Current.Scores.Any(score => score == _winningScore);
     }
 
-    public async Task SaveMatchResultsAsync()
+    public async Task SaveAsync()
     {
-        await matchModule.SaveAsync();
+        await gameModule.SaveAsync();
     }
 }

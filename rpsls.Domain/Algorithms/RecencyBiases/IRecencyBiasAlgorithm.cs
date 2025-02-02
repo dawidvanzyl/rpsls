@@ -1,10 +1,8 @@
-﻿using rpsls.Entities;
-using rpsls.Entities.Enums;
-using System.Collections.Immutable;
+﻿using rpsls.Entities.Enums;
 
 namespace rpsls.Domain.Algorithms.RecencyBiases;
 
 public interface IRecencyBiasAlgorithm
 {
-    public IImmutableDictionary<AttackTypes, decimal> ApplyRecencyBias(IImmutableDictionary<AttackTypes, decimal> attackPercentages, IImmutableList<Match> matchHistory);
+    public IDictionary<AttackTypes, decimal> ApplyRecencyBias(IDictionary<AttackTypes, decimal> attackPercentages);
 }

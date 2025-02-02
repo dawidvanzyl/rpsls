@@ -2,10 +2,9 @@
 
 namespace rpsls.Entities;
 
-public record Match(
-    int ConsecutiveRepeats,
-    bool IsNew,
+public record Round(
+    int Number,
     AttackTypes P1Attack,
     AttackTypes P2Attack,
     ResultTypes Result,
-    int Round);
+    int ConsecutiveRepeats);

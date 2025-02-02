@@ -2,18 +2,17 @@
 using rpsls.Domain.Algorithms.Weighted.Abstracts;
 using rpsls.Entities;
 using rpsls.Entities.Enums;
-using System.Collections.Immutable;
 
 namespace rpsls.Domain.Algorithms.Weighted;
 
 public class FrequencyWeighting(ILogger<FrequencyWeighting> logger)
     : AbstractWeightedAlgorithm(logger)
 {
-    protected override decimal CalculateWeight(IGrouping<AttackTypes, Match> attackGroup, IImmutableList<Match> matchHistory)
+    protected override decimal CalculateWeight(IGrouping<AttackTypes, Round> attackGroup, IList<Round> history)
     {
-        var attackFrequency = matchHistory.Count == 0
+        var attackFrequency = history.Count == 0
             ? 0m
-            : (decimal)attackGroup.Count() / matchHistory.Count; // Relative frequency of attack
+            : (decimal)attackGroup.Count() / history.Count; // Relative frequency of attack
 
         var consecutiveRepeatFrequency = (decimal)attackGroup.Count() / attackGroup.Aggregate(0L, (current, next) => next.ConsecutiveRepeats + current);
 

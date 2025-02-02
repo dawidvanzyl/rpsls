@@ -12,7 +12,7 @@ public interface IAttackPredictor
 }
 
 public class AttackPredictor(
-    IMatchModule matchModule,
+    IGameModule gameModule,
     IRuleModule ruleModule,
     IWeightingAlgorithm weightedAlgorithm,
     IRecencyBiasAlgorithm recencyBiasAlgorithm,
@@ -20,21 +20,17 @@ public class AttackPredictor(
 {
     public AttackTypes PredictNextAttack()
     {
-        var matchHistory = matchModule.GetAll();
+        var gameHistory = gameModule.GetFullHistory();
 
-        logger.LogTrace("Total Count: {TotalCount}", matchHistory.Count);
+        logger.LogTrace("Total Count: {TotalCount}", gameHistory.Count);
 
-        if (!matchHistory.Any())
+        if (!gameHistory.Any())
         {
             return (AttackTypes)Random.Shared.Next(1, 4);
         }
 
-        var attackWeights = weightedAlgorithm.CalculateWeights(matchHistory);
-
-        if (!matchHistory[^1].IsNew)
-        {
-            attackWeights = recencyBiasAlgorithm.ApplyRecencyBias(attackWeights, matchHistory);
-        }
+        var attackWeights = weightedAlgorithm.CalculateWeights(gameHistory);
+        attackWeights = recencyBiasAlgorithm.ApplyRecencyBias(attackWeights);
 
         var predictedNextAttack = attackWeights
             .OrderByDescending(kv => kv.Value)

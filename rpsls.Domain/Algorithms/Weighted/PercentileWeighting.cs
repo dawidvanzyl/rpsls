@@ -2,16 +2,15 @@
 using rpsls.Domain.Algorithms.Weighted.Abstracts;
 using rpsls.Entities;
 using rpsls.Entities.Enums;
-using System.Collections.Immutable;
 
 namespace rpsls.Domain.Algorithms.Weighted;
 
 public class PercentileWeighting(ILogger<PercentileWeighting> logger)
     : AbstractWeightedAlgorithm(logger)
 {
-    protected override decimal CalculateWeight(IGrouping<AttackTypes, Match> attackGroup, IImmutableList<Match> matchHistory)
+    protected override decimal CalculateWeight(IGrouping<AttackTypes, Round> attackGroup, IList<Round> history)
     {
-        var allConsecutiveRepeats = matchHistory
+        var allConsecutiveRepeats = history
             .Select(pa => pa.ConsecutiveRepeats)
             .Distinct()
             .OrderBy(x => x)
@@ -26,7 +25,7 @@ public class PercentileWeighting(ILogger<PercentileWeighting> logger)
         var adjustedCount = attackGroup.Count() * averagePercentileRank;
 
         // Calculate the weighted percentage
-        var weightedPercentage = adjustedCount / matchHistory.Count;
+        var weightedPercentage = adjustedCount / history.Count;
 
         logger.LogTrace("Average Percentile Rank: {AveragePercentileRank}", averagePercentileRank);
         logger.LogTrace("Adjusted Count: {AdjustedCount}", adjustedCount);

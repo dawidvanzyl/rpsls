@@ -2,20 +2,19 @@
 using rpsls.Domain.Algorithms.Weighted.Abstracts;
 using rpsls.Entities;
 using rpsls.Entities.Enums;
-using System.Collections.Immutable;
 
 namespace rpsls.Domain.Algorithms.Weighted;
 
 public class DynamicThresholdWeighting(ILogger<DynamicThresholdWeighting> logger)
     : AbstractWeightedAlgorithm(logger)
 {
-    protected override decimal CalculateWeight(IGrouping<AttackTypes, Match> attackGroup, IImmutableList<Match> matchHistory)
+    protected override decimal CalculateWeight(IGrouping<AttackTypes, Round> attackGroup, IList<Round> history)
     {
         var threshold = 5; // Arbitrary threshold for repetition
 
         // Use the max consecutive repeats instead of the sum
         var maxConsecutiveRepeats = attackGroup.Max(match => match.ConsecutiveRepeats);
-        var attackFrequency = (decimal)attackGroup.Count() / matchHistory.Count(); // Relative frequency
+        var attackFrequency = (decimal)attackGroup.Count() / history.Count(); // Relative frequency
 
         // Apply modifier based on the threshold
         var modifier = maxConsecutiveRepeats > threshold

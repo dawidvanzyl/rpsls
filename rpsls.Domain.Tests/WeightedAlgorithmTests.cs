@@ -6,7 +6,6 @@ using rpsls.Domain.Algorithms.Weighted;
 using rpsls.Entities;
 using rpsls.Entities.Enums;
 using Shouldly;
-using System.Collections.Immutable;
 using Xunit.Abstractions;
 
 namespace rpsls.Domain.Tests;
@@ -49,19 +48,19 @@ public class WeightedAlgorithmTests
     public void TestAlgorithmEffectiveness()
     {
         var historySize = 100;
-        var matchHistory = GenerateMatchHistory(historySize);
-        var expectedWeights = GetExpectedWeights(matchHistory);
+        var history = GenerateGameHistory(historySize);
+        var expectedWeights = GetExpectedWeights(history);
 
         foreach (var algorithm in _algorithms)
         {
-            var calculatedWeights = algorithm.CalculateWeights(matchHistory);
+            var calculatedWeights = algorithm.CalculateWeights(history);
             var algorithmName = algorithm.GetType().Name;
             AssertCalculatedWeights(algorithmName, calculatedWeights, expectedWeights);
             _output.WriteLine("");
         }
     }
 
-    private static Match CreateMatch((AttackTypes p1, AttackTypes p2) attacks, int repeat, int round)
+    private static Round CreateRound((AttackTypes p1, AttackTypes p2) attacks, int repeat, int round)
     {
         var resultType = attacks switch
         {
@@ -73,41 +72,41 @@ public class WeightedAlgorithmTests
             _ => ResultTypes.Loss
         };
 
-        return new Match(repeat, true, attacks.p1, attacks.p2, resultType, round);
+        return new Round(round, attacks.p1, attacks.p2, resultType, repeat);
     }
 
-    private static IImmutableList<Match> GenerateMatchHistory(int historySize)
+    private static IList<Round> GenerateGameHistory(int historySize)
     {
         var random = new Random();
-        var history = new List<Match>();
+        var history = new List<Round>();
         for (var i = 0; i < historySize; i++)
         {
             var p1Attack = (AttackTypes)random.Next(1, 4);
             var p2Attack = (AttackTypes)random.Next(1, 4);
-            history.Add(CreateMatch((p1Attack, p2Attack), GetConsecutiveRepeats(p1Attack, history), i + 1));
+            history.Add(CreateRound((p1Attack, p2Attack), GetConsecutiveRepeats(p1Attack, history), i + 1));
         }
 
-        return history.ToImmutableList();
+        return history;
     }
 
-    private static int GetConsecutiveRepeats(AttackTypes p1, IList<Match> matches)
+    private static int GetConsecutiveRepeats(AttackTypes p1, IList<Round> history)
     {
         var consecutiveRepeat = 1;
-        if (matches.Count <= 0)
+        if (history.Count <= 0)
         {
             return consecutiveRepeat;
         }
 
-        var repeated = matches[^1].P1Attack == p1;
+        var repeated = history[^1].P1Attack == p1;
         if (repeated)
         {
-            consecutiveRepeat = matches[^1].ConsecutiveRepeats + 1;
+            consecutiveRepeat = history[^1].ConsecutiveRepeats + 1;
         }
 
         return consecutiveRepeat;
     }
 
-    private void AssertCalculatedWeights(string name, IImmutableDictionary<AttackTypes, decimal> calculatedWeights, IDictionary<AttackTypes, decimal> expectedWeights)
+    private void AssertCalculatedWeights(string name, IDictionary<AttackTypes, decimal> calculatedWeights, IDictionary<AttackTypes, decimal> expectedWeights)
     {
         var sumOfWeights = calculatedWeights.Sum(kv => kv.Value);
 
@@ -123,16 +122,16 @@ public class WeightedAlgorithmTests
         }
     }
 
-    private IDictionary<AttackTypes, decimal> GetExpectedWeights(IImmutableList<Match> matchHistory)
+    private IDictionary<AttackTypes, decimal> GetExpectedWeights(IList<Round> history)
     {
-        var attackPercentages = matchHistory
+        var attackPercentages = history
             .GroupBy((matchResult) => matchResult.P1Attack)
             .Select(attackGroup =>
             {
                 return new
                 {
                     Attack = attackGroup.Key,
-                    Weight = (decimal)attackGroup.Count() / matchHistory.Count()
+                    Weight = (decimal)attackGroup.Count() / history.Count()
                 };
             })
             .ToDictionary(

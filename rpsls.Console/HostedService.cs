@@ -1,14 +1,10 @@
 ﻿using rpsls.Application;
-using rpsls.Domain.Modules;
 using rpsls.Entities.Enums;
 using Sharprompt;
 
 namespace rpsls.Console;
 
-public class HostedService(
-    IMatchModule matchModule,
-    IGameService gameService,
-    IAttackPredictor attackPredictor)
+public class HostedService(IGameService gameService, IAttackPredictor attackPredictor)
 {
     public async Task Execute()
     {
@@ -16,7 +12,7 @@ public class HostedService(
         var p2 = "Computer";
         var bestOf = Prompt.Input<int>("Best out of");
 
-        gameService.CreateMatch(bestOf);
+        var game = gameService.Create(bestOf);
         while (!gameService.IsOver())
         {
             var p1Attack = Prompt.Select<AttackTypes>($"{p1} attack");
@@ -24,14 +20,13 @@ public class HostedService(
 
             System.Console.WriteLine($"{p2} attack: {p2Attack}");
             var result = gameService.GetResult(p1Attack, p2Attack);
-
-            matchModule.Add(p1Attack, p2Attack, result);
+            game.AddRound(p1Attack, p2Attack, result);
 
             System.Console.WriteLine(result);
             System.Console.WriteLine();
         }
 
-        await gameService.SaveMatchResultsAsync();
+        await gameService.SaveAsync();
         System.Console.WriteLine("Matches saved");
 
         var matchScores = gameService.GetScores();

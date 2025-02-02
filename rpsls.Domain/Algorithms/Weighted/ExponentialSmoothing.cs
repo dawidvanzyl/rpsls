@@ -2,16 +2,15 @@
 using rpsls.Domain.Algorithms.Weighted.Abstracts;
 using rpsls.Entities;
 using rpsls.Entities.Enums;
-using System.Collections.Immutable;
 
 namespace rpsls.Domain.Algorithms.Weighted;
 
 public class ExponentialSmoothing(ILogger<ExponentialSmoothing> logger)
     : AbstractWeightedAlgorithm(logger)
 {
-    protected override decimal CalculateWeight(IGrouping<AttackTypes, Match> attackGroup, IImmutableList<Match> matchHistory)
+    protected override decimal CalculateWeight(IGrouping<AttackTypes, Round> attackGroup, IList<Round> history)
     {
-        if (matchHistory.Count == 0)
+        if (history.Count == 0)
         {
             return 0m; // Avoid division by zero
         }
@@ -26,7 +25,7 @@ public class ExponentialSmoothing(ILogger<ExponentialSmoothing> logger)
         }
 
         // Calculate the weighted percentage
-        var weightedPercentage = smoothedCount / matchHistory.Count;
+        var weightedPercentage = smoothedCount / history.Count;
 
         logger.LogTrace("Smoothed Count: {SmoothedCount}", smoothedCount);
         logger.LogTrace("Weighted Percentage: {WeightedPercentage}", weightedPercentage);

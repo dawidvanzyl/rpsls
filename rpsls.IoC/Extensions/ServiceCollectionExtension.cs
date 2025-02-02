@@ -43,7 +43,7 @@ public static class ServiceCollectionExtension
         });
 
         services
-            .AddSingleton<IMatchModule, MatchModule>()
+            .AddSingleton<IGameModule, GameModule>()
             .AddSingleton<IRuleModule, RuleModule>();
 
         services.AddSingleton<IAttackPredictor, AttackPredictor>();
@@ -54,7 +54,7 @@ public static class ServiceCollectionExtension
     public static IServiceCollection Infrastructure(this IServiceCollection services)
     {
         services
-            .AddSingleton<IMatchRepository, MatchRepository>()
+            .AddSingleton<IGameRepository, GameRepository>()
             .AddSingleton<IRuleRepository, RuleRepository>();
 
         return services;

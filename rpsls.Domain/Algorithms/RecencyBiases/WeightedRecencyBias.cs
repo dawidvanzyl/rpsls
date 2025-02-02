@@ -1,19 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
 using rpsls.Domain.Algorithms.RecencyBiases.Abstracts;
-using rpsls.Entities;
+using rpsls.Domain.Modules;
 using rpsls.Entities.Enums;
-using System.Collections.Immutable;
 
 namespace rpsls.Domain.Algorithms.RecencyBiases;
 
-public class WeightedRecencyBias(ILogger<WeightedRecencyBias> logger)
-    : AbstactRecencyBiasAlgorithm(logger)
+public class WeightedRecencyBias(ILogger<WeightedRecencyBias> logger, IGameModule gameModule)
+    : AbstactRecencyBiasAlgorithm(logger, gameModule)
 {
-    protected override decimal GetBoostedPercentage(
-        AttackTypes attack,
-        decimal percentage,
-        decimal recencyBiasFactor,
-        IImmutableList<Match> matchHistory)
+    protected override decimal GetBoostedPercentage(AttackTypes attack, decimal percentage, decimal recencyBiasFactor)
     {
         var recencyBiasBoost = 1 + recencyBiasFactor;
         var boostedPercentage = percentage * recencyBiasBoost;
